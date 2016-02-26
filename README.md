@@ -20,3 +20,20 @@ UI testing:
 - `cd canopy-repl`
 - `sh ./build.sh`
 - run automation tests with `fshapi --exec "Tests.fsx"`
+
+Heroku deploy:
+
+- install heroku toolbelt: https://toolbelt.heroku.com/
+- `heroku login`
+- `heroku apps:create agilitree`
+- `git push heroku master`
+- `heroku open`
+
+Usage:
+
+- disable vimium if you use that plugin (you won't need it)
+- `j` to move down
+- `k` to move down
+- `c` to change entry
+- `ESC` to save entry
+- `x` to delete entry

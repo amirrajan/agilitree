@@ -25,7 +25,7 @@ Heroku deploy:
 
 - install heroku toolbelt: https://toolbelt.heroku.com/
 - `heroku login`
-- `heroku apps:create agilitree`
+- `heroku apps:create [YOURAPPNAME]`
 - `git push heroku master`
 - `heroku open`
 
@@ -36,4 +36,4 @@ Usage:
 - `k` to move down
 - `c` to change entry
 - `ESC` to save entry
-- `x` to delete entry
+- `x` to cut entry

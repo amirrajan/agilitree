@@ -218,13 +218,27 @@ class AgileTreeContainer extends Component {
 
   render() {
     return (
-      <Tree
-        uia='tree'
-        tree={this.state.tree}
-        save={this.save.bind(this)}
-        currentlyFocused={this.state.currentlyFocused}
-        currentlyEditing={this.state.currentlyEditing}
-      />
+      <div>
+        <Tree
+          uia='tree'
+          tree={this.state.tree}
+          save={this.save.bind(this)}
+          currentlyFocused={this.state.currentlyFocused}
+          currentlyEditing={this.state.currentlyEditing}
+        />
+        <div id="usage">
+          Usage:
+
+          <ul>
+            <li>disable vimium if you use that chrome plugin (you won't need it)</li>
+            <li>`j` to move down</li>
+            <li>`k` to move up</li>
+            <li>`c` to change entry</li>
+            <li>`ESC` to save entry</li>
+            <li>`x` to cut entry</li>
+          </ul>
+        </div>
+      </div>
     );
   }
 }

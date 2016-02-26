@@ -18,3 +18,9 @@ textarea {
   font-size: 12px;
   padding: 0 0;
 }
+
+
+#usage {
+  position: fixed;
+  bottom: 0;
+}

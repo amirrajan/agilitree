@@ -34,11 +34,11 @@ function rowsBelow(table, order) {
   return filter(table, r => r.order > order)
 }
 
-export function getPrevious(table, id) {
+export function getAbove(table, id) {
   return last(sort(rowsAbove(table, findRow(table, id).order)));
 }
 
-export function getNext(table, id) {
+export function getBelow(table, id) {
   return first(sort(rowsBelow(table, findRow(table, id).order)));
 }
 
@@ -91,6 +91,17 @@ export function cut(table, id) {
   return filter(table, t => t.id != id);
 }
 
+export function addRight(table, rightOfId, row) {
+  var results = add(table, row);
+  var addedRow = findRow(results, row.id)
+  addedRow.parentId = rightOfId;
+  return results;
+}
+
+export function getRightOf(table, rightOfId) {
+  return filter(table, { parentId: rightOfId});
+}
+
 export function replay(logs, startingTable = [ ]) {
   each(logs, l => {
     if(l.action == 'add') {
@@ -103,6 +114,8 @@ export function replay(logs, startingTable = [ ]) {
       startingTable = update(startingTable, l.id, l.text);
     } else if (l.action == 'cut') {
       startingTable = cut(startingTable, l.id);
+    } else if (l.action == 'addRight') {
+      startingTable = addRight(startingTable, l.rightOfId, l.row);
     }
   });
 
@@ -127,4 +140,8 @@ export function logUpdate(logs, id, text) {
 
 export function logCut(logs, id) {
   return concat(logs, { action: 'cut', id });
+}
+
+export function logAddRight(logs, rightOfId, row) {
+  return concat(logs, { action: 'addRight', rightOfId, row });
 }

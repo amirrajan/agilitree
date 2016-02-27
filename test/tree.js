@@ -6,10 +6,12 @@ import {
   logAddBelow,
   logAddAbove,
   logUpdate,
+  logAddRight,
   logCut,
   replay,
-  getPrevious,
-  getNext
+  getAbove,
+  getBelow,
+  getRightOf
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -40,9 +42,7 @@ describe('tree', function () {
       { id: row2.id, text: row2.text, order: 3 }
     ];
 
-    areSame(
-      replay(logs),
-      expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('add above', function() {
@@ -60,9 +60,7 @@ describe('tree', function () {
       { id: row1.id, text: row1.text, order: 1 }
     ];
 
-    areSame(
-      replay(logs),
-      expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('update', function() {
@@ -76,11 +74,8 @@ describe('tree', function () {
       { id: row.id, text: 'say hello', order: 1 }
     ];
 
-    areSame(
-      replay(logs),
-      expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
-
 
   specify('previous', function() {
     var row1 = newRow('root');
@@ -91,7 +86,7 @@ describe('tree', function () {
 
     var tree = replay(logs);
 
-    var result = getPrevious(tree, row2.id).id;
+    var result = getAbove(tree, row2.id).id;
 
     assert.equal(result, row1.id);
   });
@@ -105,7 +100,7 @@ describe('tree', function () {
 
     var tree = replay(logs);
 
-    var result = getNext(tree, row1.id).id;
+    var result = getBelow(tree, row1.id).id;
 
     assert.equal(result, row2.id);
   });
@@ -122,8 +117,30 @@ describe('tree', function () {
       { id: row1.id, text: row1.text, order: 1 }
     ];
 
-    areSame(
-      replay(logs),
-      expectedStructure);
+    areSame(replay(logs), expectedStructure);
+  });
+
+  specify('adding children', function() {
+    var row1 = newRow('root');
+    var row2 = newRow('foo');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddRight(logs, row1.id, row2);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1 },
+      { id: row2.id, text: row2.text, order: 2, parentId: row1.id }
+    ];
+
+    var tree = replay(logs);
+    areSame(tree, expectedStructure);
+
+    var right = getRightOf(tree, row1.id);
+
+    var expectedRight = [
+      { id: row2.id, text: row2.text, order: 2, parentId: row1.id }
+    ];
+
+    areSame(right, expectedRight);
   });
 });

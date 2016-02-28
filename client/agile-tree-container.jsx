@@ -121,12 +121,13 @@ class AgileTreeContainer extends Component {
     super();
 
     var logs = this.getLogsFromLocalStorage();
+    var tree = replay(logs);
 
     this.state = {
       logs,
-      tree: replay(logs),
+      tree,
       currentlyEditing: null,
-      currentlyFocused: first(replay(logs)).id
+      currentlyFocused: first(filter(tree, r => !r.parentId)).id
     };
   }
 
@@ -177,6 +178,14 @@ class AgileTreeContainer extends Component {
 
   addChildOrRight(e) {
     this.addOrSelect(e, getFirstRightOf, logAddRight);
+  }
+
+  root(e) {
+    this.setState({
+      currentlyFocused: first(filter(this.state.tree, r => !r.parentId)).id,
+      currentlyEditing: null
+    });
+    e.preventDefault();
   }
 
   addSiblingAboveBelow(e) {
@@ -302,7 +311,9 @@ class AgileTreeContainer extends Component {
     key('l', this.addChildOrRight.bind(this));
     key('h', this.left.bind(this));
     key('x', this.cut.bind(this));
-    key('O', this.addSiblingAboveBelow.bind(this));
+    key('o', this.addSiblingAboveBelow.bind(this));
+    key('shift+o', this.addSiblingAboveBelow.bind(this));
+    key('0', this.root.bind(this));
   }
 
   render() {
@@ -321,6 +332,7 @@ class AgileTreeContainer extends Component {
 
           <ul>
             <li>disable vimium if you use that chrome plugin (you won't need it)</li>
+            <li>`0` very top</li>
             <li>`O` add above</li>
             <li>`o` add below</li>
             <li>`j` to move down</li>

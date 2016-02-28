@@ -209,7 +209,7 @@ class AgileTreeContainer extends Component {
       logs,
       tree: replay(logs),
       currentlyFocused: newId,
-      currentlyEditing: null
+      currentlyEditing: newId
     });
 
     e.preventDefault();

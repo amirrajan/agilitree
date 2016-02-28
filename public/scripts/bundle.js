@@ -549,12 +549,15 @@
 	    var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(AgileTreeContainer).call(this));
 	
 	    var logs = _this4.getLogsFromLocalStorage();
+	    var tree = (0, _tree.replay)(logs);
 	
 	    _this4.state = {
 	      logs: logs,
-	      tree: (0, _tree.replay)(logs),
+	      tree: tree,
 	      currentlyEditing: null,
-	      currentlyFocused: (0, _lodash.first)((0, _tree.replay)(logs)).id
+	      currentlyFocused: (0, _lodash.first)((0, _lodash.filter)(tree, function (r) {
+	        return !r.parentId;
+	      })).id
 	    };
 	    return _this4;
 	  }
@@ -615,6 +618,39 @@
 	      this.addOrSelect(e, _tree.getFirstRightOf, _tree.logAddRight);
 	    }
 	  }, {
+	    key: 'root',
+	    value: function root(e) {
+	      this.setState({
+	        currentlyFocused: (0, _lodash.first)((0, _lodash.filter)(this.state.tree, function (r) {
+	          return !r.parentId;
+	        })).id,
+	        currentlyEditing: null
+	      });
+	      e.preventDefault();
+	    }
+	  }, {
+	    key: 'addSiblingAboveBelow',
+	    value: function addSiblingAboveBelow(e) {
+	      var currentlyFocused = this.state.currentlyFocused;
+	      var newId = _guid2.default.raw();
+	      var logs = this.state.logs;
+	
+	      if (e.shiftKey) {
+	        logs = (0, _tree.logAddAbove)(logs, currentlyFocused, { id: newId, text: '' });
+	      } else {
+	        logs = (0, _tree.logAddBelow)(logs, currentlyFocused, { id: newId, text: '' });
+	      }
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs),
+	        currentlyFocused: newId,
+	        currentlyEditing: null
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'addOrSelect',
 	    value: function addOrSelect(e, targetFunction, logFunction) {
 	      var currentlyFocused = this.state.currentlyFocused;
@@ -627,13 +663,6 @@
 	          currentlyEditing: null
 	        });
 	      } else {
-	        var current = (0, _tree.findRow)(tree, currentlyFocused);
-	
-	        if (current && current.text == '') {
-	          e.preventDefault();
-	          return;
-	        }
-	
 	        var newId = _guid2.default.raw();
 	
 	        var logs = logFunction(this.state.logs, currentlyFocused, { id: newId, text: '' });
@@ -676,6 +705,8 @@
 	
 	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(this.state.tree, this.state.currentlyFocused);
 	
+	      if (!prevOrNextOrLeft) return;
+	
 	      var logs = (0, _tree.logCut)(this.state.logs, this.state.currentlyFocused);
 	
 	      this.setState({
@@ -703,12 +734,15 @@
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      key('c', this.edit.bind(this));
+	      key('i', this.edit.bind(this));
 	      key('j', this.addSiblingOrMoveBelow.bind(this));
 	      key('k', this.addSiblingOrMoveAbove.bind(this));
 	      key('l', this.addChildOrRight.bind(this));
 	      key('h', this.left.bind(this));
 	      key('x', this.cut.bind(this));
-	      key('0', this.left.bind(this));
+	      key('o', this.addSiblingAboveBelow.bind(this));
+	      key('shift+o', this.addSiblingAboveBelow.bind(this));
+	      key('0', this.root.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -738,6 +772,21 @@
 	            React.createElement(
 	              'li',
 	              null,
+	              '`0` very top'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              '`O` add above'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              '`o` add below'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
 	              '`j` to move down'
 	            ),
 	            React.createElement(
@@ -758,7 +807,7 @@
 	            React.createElement(
 	              'li',
 	              null,
-	              '`c` to change entry'
+	              '`c`, `i` to change entry'
 	            ),
 	            React.createElement(
 	              'li',

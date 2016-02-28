@@ -179,6 +179,33 @@ class AgileTreeContainer extends Component {
     this.addOrSelect(e, getFirstRightOf, logAddRight);
   }
 
+  addSiblingAboveBelow(e) {
+    var currentlyFocused = this.state.currentlyFocused;
+    var newId = Guid.raw();
+    var logs = this.state.logs;
+
+    if(e.shiftKey) {
+      logs = logAddAbove(
+        logs,
+        currentlyFocused,
+        { id: newId, text: '' });
+    } else {
+      logs = logAddBelow(
+        logs,
+        currentlyFocused,
+        { id: newId, text: '' });
+    }
+
+    this.setState({
+      logs,
+      tree: replay(logs),
+      currentlyFocused: newId,
+      currentlyEditing: null
+    });
+
+    e.preventDefault();
+  }
+
   addOrSelect(e, targetFunction, logFunction) {
     var currentlyFocused = this.state.currentlyFocused;
     var tree = this.state.tree;
@@ -190,13 +217,6 @@ class AgileTreeContainer extends Component {
         currentlyEditing: null
       });
     } else {
-      var current = findRow(tree, currentlyFocused);
-
-      if(current && current.text == '') {
-        e.preventDefault();
-        return;
-      }
-
       var newId = Guid.raw();
 
       var logs = logFunction(
@@ -246,6 +266,8 @@ class AgileTreeContainer extends Component {
       this.state.tree,
       this.state.currentlyFocused);
 
+    if(!prevOrNextOrLeft) return;
+
     var logs = logCut(this.state.logs, this.state.currentlyFocused);
 
     this.setState({
@@ -274,12 +296,13 @@ class AgileTreeContainer extends Component {
 
   componentDidMount() {
     key('c', this.edit.bind(this));
+    key('i', this.edit.bind(this));
     key('j', this.addSiblingOrMoveBelow.bind(this));
     key('k', this.addSiblingOrMoveAbove.bind(this));
     key('l', this.addChildOrRight.bind(this));
     key('h', this.left.bind(this));
     key('x', this.cut.bind(this));
-    key('0', this.left.bind(this));
+    key('O', this.addSiblingAboveBelow.bind(this));
   }
 
   render() {
@@ -298,11 +321,13 @@ class AgileTreeContainer extends Component {
 
           <ul>
             <li>disable vimium if you use that chrome plugin (you won't need it)</li>
+            <li>`O` add above</li>
+            <li>`o` add below</li>
             <li>`j` to move down</li>
             <li>`k` to move up</li>
             <li>`l` to move right</li>
             <li>`h` to move left</li>
-            <li>`c` to change entry</li>
+            <li>`c`, `i` to change entry</li>
             <li>`ESC` to save entry</li>
             <li>`x` to cut entry</li>
           </ul>

@@ -555,19 +555,27 @@
 	      logs: logs,
 	      tree: tree,
 	      currentlyEditing: null,
-	      currentlyFocused: (0, _lodash.first)((0, _lodash.filter)(tree, function (r) {
-	        return !r.parentId;
-	      })).id
+	      currentlyFocused: _this4.firstRootNode(tree)
 	    };
 	    return _this4;
 	  }
 	
 	  _createClass(AgileTreeContainer, [{
+	    key: 'firstRootNode',
+	    value: function firstRootNode(tree) {
+	      return (0, _tree.getRoot)(tree).id;
+	    }
+	  }, {
 	    key: 'setState',
 	    value: function setState(o) {
 	      _get(Object.getPrototypeOf(AgileTreeContainer.prototype), 'setState', this).call(this, o);
 	
 	      if (o.logs) localStorage.setItem('logs', JSON.stringify(o.logs));
+	    }
+	  }, {
+	    key: 'defaultSetup',
+	    value: function defaultSetup(id) {
+	      return (0, _tree.logAdd)([], { id: id, text: 'root' });
 	    }
 	  }, {
 	    key: 'getLogsFromLocalStorage',
@@ -579,17 +587,14 @@
 	        logs = JSON.parse(logs);
 	
 	        if (logs.length == 0) {
-	          logs = [];
-	          logs = (0, _tree.logAdd)(logs, { id: firstId, text: 'root' });
+	          logs = this.defaultSetup(firstId);
 	        }
 	      } catch (e) {
-	        logs = [];
-	        logs = (0, _tree.logAdd)(logs, { id: firstId, text: 'root' });
+	        logs = this.defaultSetup(firstId);
 	      }
 	
 	      if (!logs) {
-	        logs = [];
-	        logs = (0, _tree.logAdd)(logs, { id: firstId, text: 'root' });
+	        logs = this.defaultSetup(firstId);
 	
 	        localStorage.setItem('logs', JSON.stringify(logs));
 	      }
@@ -599,8 +604,8 @@
 	  }, {
 	    key: 'edit',
 	    value: function edit(e) {
-	      e.preventDefault();
 	      this.setState({ currentlyEditing: this.state.currentlyFocused });
+	      e.preventDefault();
 	    }
 	  }, {
 	    key: 'addSiblingOrMoveBelow',
@@ -621,11 +626,10 @@
 	    key: 'root',
 	    value: function root(e) {
 	      this.setState({
-	        currentlyFocused: (0, _lodash.first)((0, _lodash.filter)(this.state.tree, function (r) {
-	          return !r.parentId;
-	        })).id,
+	        currentlyFocused: this.firstRootNode(this.state.tree),
 	        currentlyEditing: null
 	      });
+	
 	      e.preventDefault();
 	    }
 	  }, {
@@ -731,6 +735,24 @@
 	      });
 	    }
 	  }, {
+	    key: 'topOrBottom',
+	    value: function topOrBottom(e) {
+	      var tree = this.state.tree;
+	      var currentlyFocused = this.state.currentlyFocused;
+	
+	      if (e.shiftKey) {
+	        this.setState({
+	          currentlyFocused: (0, _tree.bottom)(tree, currentlyFocused).id
+	        });
+	      } else {
+	        this.setState({
+	          currentlyFocused: (0, _tree.top)(tree, currentlyFocused).id
+	        });
+	      }
+	
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      key('c', this.edit.bind(this));
@@ -743,6 +765,8 @@
 	      key('o', this.addSiblingAboveBelow.bind(this));
 	      key('shift+o', this.addSiblingAboveBelow.bind(this));
 	      key('0', this.root.bind(this));
+	      key('g', this.topOrBottom.bind(this));
+	      key('shift+g', this.topOrBottom.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -803,6 +827,16 @@
 	              'li',
 	              null,
 	              '`h` to move left'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              '`G` move to bottom of current list'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              '`g` move to top of current list'
 	            ),
 	            React.createElement(
 	              'li',
@@ -20562,6 +20596,9 @@
 	exports.getAbove = getAbove;
 	exports.getBelow = getBelow;
 	exports.getLeft = getLeft;
+	exports.getRoot = getRoot;
+	exports.top = top;
+	exports.bottom = bottom;
 	exports.split = split;
 	exports.combine = combine;
 	exports.addBelow = addBelow;
@@ -20633,6 +20670,20 @@
 	  if (!row.parentId) return null;
 	
 	  return findRow(table, row.parentId);
+	}
+	
+	function getRoot(table) {
+	  return (0, _lodash.first)((0, _lodash.filter)(table, function (r) {
+	    return !r.parentId;
+	  }));
+	}
+	
+	function top(table, reference) {
+	  return (0, _lodash.first)(sort(rowsWithParentId(table, findRow(table, reference).parentId)));
+	}
+	
+	function bottom(table, reference) {
+	  return (0, _lodash.last)(sort(rowsWithParentId(table, findRow(table, reference).parentId)));
 	}
 	
 	function split(table, onId) {

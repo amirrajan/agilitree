@@ -56,6 +56,14 @@ export function getBelow(table, id) {
   return first(sort(rowsBelow(table, row.order, row.parentId)));
 }
 
+export function getLeft(table, id) {
+  var row = findRow(table, id);
+
+  if(!row.parentId) return null;
+
+  return findRow(table, row.parentId);
+}
+
 export function split(table, onId) {
   var on = findRow(table, onId);
   var above = rowsAbove(table, on.order);
@@ -118,6 +126,10 @@ export function addRight(table, rightOfId, row) {
 
 export function getRightOf(table, rightOfId) {
   return filter(table, { parentId: rightOfId});
+}
+
+export function getFirstRightOf(table, rightOfId) {
+  return first(getRightOf(table, rightOfId));
 }
 
 export function replay(logs, startingTable = [ ]) {

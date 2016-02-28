@@ -5,13 +5,12 @@ import {
   logAdd,
   logAddBelow,
   logAddAbove,
-  logUpdate,
   logAddRight,
-  logCut,
   replay,
   getAbove,
   getBelow,
-  getRightOf
+  getRightOf,
+  getFirstRightOf
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -50,6 +49,16 @@ describe('tree children', function () {
     ];
 
     areSame(right, expectedRight);
+
+    var firstRight = getFirstRightOf(tree, row1.id);
+    var expectedFirstRight = {
+      id: row2.id,
+      text: row2.text,
+      order: 1,
+      parentId: row1.id
+    };
+
+    areSame(firstRight, expectedFirstRight);
   });
 
   describe('adding multiple children', function() {

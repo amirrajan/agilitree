@@ -11,7 +11,9 @@ import {
   replay,
   getAbove,
   findRow,
-  getBelow
+  getBelow,
+  getLeft,
+  getFirstRightOf
 } from './tree.js';
 
 import { map, first, filter } from 'lodash';
@@ -166,35 +168,18 @@ class AgileTreeContainer extends Component {
   }
 
   addSiblingOrMoveBelow(e) {
-    this.addSiblingOrSelect(e, getBelow, logAddBelow);
+    this.addOrSelect(e, getBelow, logAddBelow);
   }
 
   addSiblingOrMoveAbove(e) {
-    this.addSiblingOrSelect(e, getAbove, logAddAbove);
+    this.addOrSelect(e, getAbove, logAddAbove);
   }
 
   addChildOrRight(e) {
-    var currentlyFocused = this.state.currentlyFocused;
-    var newId = Guid.raw();
-
-    var logs = logAddRight(
-      this.state.logs,
-      currentlyFocused, {
-        id: newId,
-        text: ''
-      });
-
-    this.setState({
-      logs,
-      tree: replay(logs),
-      currentlyFocused: newId,
-      currentlyEditing: null
-    });
-
-    e.preventDefault();
+    this.addOrSelect(e, getFirstRightOf, logAddRight);
   }
 
-  addSiblingOrSelect(e, targetFunction, logFunction) {
+  addOrSelect(e, targetFunction, logFunction) {
     var currentlyFocused = this.state.currentlyFocused;
     var tree = this.state.tree;
     var target = targetFunction(tree, currentlyFocused);
@@ -227,14 +212,27 @@ class AgileTreeContainer extends Component {
     e.preventDefault();
   }
 
-  cut() {
+  left(e) {
+    var row = findRow(this.state.tree, this.state.currentlyFocused);
+    if(row.parentId != null) this.setState({
+      currentlyFocused: row.parentId,
+      currentlyEditing: null
+    });
+    e.preventDefault();
+  }
+
+  cut(e) {
     if(this.state.tree.length == 1) return;
 
-    var prevOrNext = getAbove(
+    var prevOrNextOrLeft = getAbove(
       this.state.tree,
       this.state.currentlyFocused);
 
-    prevOrNext = prevOrNext || getBelow(
+    prevOrNextOrLeft = prevOrNextOrLeft || getBelow(
+      this.state.tree,
+      this.state.currentlyFocused);
+
+    prevOrNextOrLeft = prevOrNextOrLeft || getLeft(
       this.state.tree,
       this.state.currentlyFocused);
 
@@ -243,7 +241,7 @@ class AgileTreeContainer extends Component {
     this.setState({
       logs,
       tree: replay(logs),
-      currentlyFocused: prevOrNext.id,
+      currentlyFocused: prevOrNextOrLeft.id,
       currentlyEditing: null
     });
 
@@ -269,6 +267,7 @@ class AgileTreeContainer extends Component {
     key('j', this.addSiblingOrMoveBelow.bind(this));
     key('k', this.addSiblingOrMoveAbove.bind(this));
     key('l', this.addChildOrRight.bind(this));
+    key('h', this.left.bind(this));
     key('x', this.cut.bind(this));
   }
 

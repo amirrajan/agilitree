@@ -12,6 +12,11 @@ li {
   padding: 3px;
 }
 
+ul {
+  padding-left: 15px;
+  list-style-position: inside;
+}
+
 textarea {
   border: none;
   font-family: monospace;

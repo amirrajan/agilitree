@@ -133,7 +133,7 @@ class AgileTreeContainer extends Component {
   setState(o) {
     super.setState(o);
 
-    localStorage.setItem('logs', JSON.stringify(o.logs));
+    if(o.logs) localStorage.setItem('logs', JSON.stringify(o.logs));
   }
 
   getLogsFromLocalStorage() {
@@ -192,7 +192,10 @@ class AgileTreeContainer extends Component {
     } else {
       var current = findRow(tree, currentlyFocused);
 
-      if(current && current.text == '') return;
+      if(current && current.text == '') {
+        e.preventDefault();
+        return;
+      }
 
       var newId = Guid.raw();
 
@@ -214,15 +217,22 @@ class AgileTreeContainer extends Component {
 
   left(e) {
     var row = findRow(this.state.tree, this.state.currentlyFocused);
-    if(row.parentId != null) this.setState({
-      currentlyFocused: row.parentId,
-      currentlyEditing: null
-    });
+
+    if(row.parentId != null) {
+      this.setState({
+        currentlyFocused: row.parentId,
+        currentlyEditing: null
+      });
+    }
+
     e.preventDefault();
   }
 
   cut(e) {
-    if(this.state.tree.length == 1) return;
+    if(this.state.tree.length == 1) {
+      e.preventDefault();
+      return;
+    }
 
     var prevOrNextOrLeft = getAbove(
       this.state.tree,

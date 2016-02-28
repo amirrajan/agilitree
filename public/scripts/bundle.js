@@ -20521,12 +20521,12 @@
 	
 	var _lodash = __webpack_require__(162);
 	
-	function newRow(id, text, order) {
-	  return { id: id, text: text, order: order };
+	function newRow(id, text, order, parentId) {
+	  return { id: id, text: text, order: order, parentId: parentId };
 	}
 	
 	function add(table, row) {
-	  return (0, _lodash.concat)(table, newRow(row.id, row.text, table.length + 1));
+	  return (0, _lodash.concat)(table, newRow(row.id, row.text, row.order || table.length + 1, row.parentId || null));
 	}
 	
 	function findRow(table, id) {
@@ -20537,38 +20537,47 @@
 	  return (0, _lodash.sortBy)(table, 'order');
 	}
 	
-	function rowsAbove(table, order) {
-	  return (0, _lodash.filter)(table, function (r) {
+	function rowsAbove(table, order, parentId) {
+	  return (0, _lodash.filter)(rowsWithParentId(table, parentId), function (r) {
 	    return r.order < order;
 	  });
 	}
 	
-	function rowsBelow(table, order) {
-	  return (0, _lodash.filter)(table, function (r) {
+	function rowsBelow(table, order, parentId) {
+	  return (0, _lodash.filter)(rowsWithParentId(table, parentId), function (r) {
 	    return r.order > order;
 	  });
 	}
 	
+	function rowsWithParentId(table, parentId) {
+	  return (0, _lodash.filter)(table, function (r) {
+	    return r.parentId == parentId;
+	  });
+	}
+	
 	function getAbove(table, id) {
-	  return (0, _lodash.last)(sort(rowsAbove(table, findRow(table, id).order)));
+	  var row = findRow(table, id);
+	
+	  return (0, _lodash.last)(sort(rowsAbove(table, row.order, row.parentId)));
 	}
 	
 	function getBelow(table, id) {
-	  return (0, _lodash.first)(sort(rowsBelow(table, findRow(table, id).order)));
+	  var row = findRow(table, id);
+	
+	  return (0, _lodash.first)(sort(rowsBelow(table, row.order, row.parentId)));
 	}
 	
 	function split(table, onId) {
 	  var on = findRow(table, onId);
+	  var above = rowsAbove(table, on.order);
+	  var below = rowsBelow(table, on.order);
+	  var rest = (0, _lodash.difference)(table, (0, _lodash.concat)(above, on, below));
 	
-	  return {
-	    above: rowsAbove(table, on.order),
-	    on: on,
-	    below: rowsBelow(table, on.order)
-	  };
+	  return { above: above, on: on, below: below, rest: rest };
 	}
 	
 	function combine(workingSet) {
-	  return (0, _lodash.concat)(workingSet.above, workingSet.on, workingSet.below);
+	  return (0, _lodash.concat)(workingSet.above, workingSet.on, workingSet.below, workingSet.rest);
 	}
 	
 	function addBelow(table, belowId, row) {
@@ -20577,7 +20586,7 @@
 	    return r.order += 1;
 	  });
 	
-	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order + 1)));
+	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order + 1, workingSet.on.parentId)));
 	}
 	
 	function addAbove(table, aboveId, row) {
@@ -20586,7 +20595,7 @@
 	    return r.order -= 1;
 	  });
 	
-	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order - 1)));
+	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order - 1, workingSet.on.parentId)));
 	}
 	
 	function update(table, id, text) {
@@ -20602,10 +20611,9 @@
 	}
 	
 	function addRight(table, rightOfId, row) {
-	  var results = add(table, row);
-	  var addedRow = findRow(results, row.id);
-	  addedRow.parentId = rightOfId;
-	  return results;
+	  row.order = rowsWithParentId(table, rightOfId).length + 1;
+	  row.parentId = rightOfId;
+	  return add(table, row);
 	}
 	
 	function getRightOf(table, rightOfId) {

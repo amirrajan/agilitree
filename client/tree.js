@@ -68,6 +68,16 @@ export function getRoot(table) {
   return first(filter(table, r => !r.parentId));
 }
 
+export function top(table, reference) {
+  return first(
+    sort(rowsWithParentId(table, findRow(table, reference).parentId)));
+}
+
+export function bottom(table, reference) {
+  return last(
+    sort(rowsWithParentId(table, findRow(table, reference).parentId)));
+}
+
 export function split(table, onId) {
   var on = findRow(table, onId);
   var above = rowsAbove(table, on.order);

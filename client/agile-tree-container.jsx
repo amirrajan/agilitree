@@ -14,10 +14,12 @@ import {
   getBelow,
   getLeft,
   getFirstRightOf,
-  getRoot
+  getRoot,
+  top,
+  bottom
 } from './tree.js';
 
-import { map, first, filter } from 'lodash';
+import { map, filter } from 'lodash';
 
 class TreeNode extends Component {
   getinitialState() {
@@ -310,6 +312,23 @@ class AgileTreeContainer extends Component {
     });
   }
 
+  topOrBottom(e) {
+    var tree = this.state.tree;
+    var currentlyFocused = this.state.currentlyFocused;
+
+    if(e.shiftKey) {
+      this.setState({
+        currentlyFocused: bottom(tree, currentlyFocused).id
+      });
+    } else {
+      this.setState({
+        currentlyFocused: top(tree, currentlyFocused).id
+      });
+    }
+
+    e.preventDefault();
+  }
+
   componentDidMount() {
     key('c', this.edit.bind(this));
     key('i', this.edit.bind(this));
@@ -321,6 +340,8 @@ class AgileTreeContainer extends Component {
     key('o', this.addSiblingAboveBelow.bind(this));
     key('shift+o', this.addSiblingAboveBelow.bind(this));
     key('0', this.root.bind(this));
+    key('g', this.topOrBottom.bind(this));
+    key('shift+g', this.topOrBottom.bind(this));
   }
 
   render() {
@@ -346,6 +367,8 @@ class AgileTreeContainer extends Component {
             <li>`k` to move up</li>
             <li>`l` to move right</li>
             <li>`h` to move left</li>
+            <li>`G` move to bottom of current list</li>
+            <li>`g` move to top of current list</li>
             <li>`c`, `i` to change entry</li>
             <li>`ESC` to save entry</li>
             <li>`x` to cut entry</li>

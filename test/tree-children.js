@@ -10,7 +10,9 @@ import {
   getAbove,
   getBelow,
   getRightOf,
-  getFirstRightOf
+  getFirstRightOf,
+  top,
+  bottom
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -102,6 +104,38 @@ describe('tree children', function () {
       assert.equal(getAbove(tree, row3.id).id, row2.id);
       assert.equal(getAbove(tree, row2.id), null);
     });
+  });
+
+  specify('top of current', function() {
+    var row1 = newRow('./root');
+    var row2 = newRow('./root/child');
+    var row3 = newRow('./root/child2');
+    var row4 = newRow('./foo');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddBelow(logs, row1.id, row4);
+    logs = logAddRight(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+
+    var tree = replay(logs);
+    assert.equal(top(tree, row4.id).id, row1.id);
+    assert.equal(top(tree, row3.id).id, row2.id);
+  });
+
+  specify('bottom of current', function() {
+    var row1 = newRow('./root');
+    var row2 = newRow('./root/child');
+    var row3 = newRow('./root/child2');
+    var row4 = newRow('./foo');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddBelow(logs, row1.id, row4);
+    logs = logAddRight(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+
+    var tree = replay(logs);
+    assert.equal(bottom(tree, row1.id).id, row4.id);
+    assert.equal(bottom(tree, row2.id).id, row3.id);
   });
 
   specify('previous for parent with children', function() {

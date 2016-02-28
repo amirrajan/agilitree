@@ -698,6 +698,7 @@
 	      key('l', this.addChildOrRight.bind(this));
 	      key('h', this.left.bind(this));
 	      key('x', this.cut.bind(this));
+	      key('0', this.left.bind(this));
 	    }
 	  }, {
 	    key: 'render',

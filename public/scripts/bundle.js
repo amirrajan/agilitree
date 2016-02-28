@@ -602,36 +602,21 @@
 	  }, {
 	    key: 'addSiblingOrMoveBelow',
 	    value: function addSiblingOrMoveBelow(e) {
-	      this.addSiblingOrSelect(e, _tree.getBelow, _tree.logAddBelow);
+	      this.addOrSelect(e, _tree.getBelow, _tree.logAddBelow);
 	    }
 	  }, {
 	    key: 'addSiblingOrMoveAbove',
 	    value: function addSiblingOrMoveAbove(e) {
-	      this.addSiblingOrSelect(e, _tree.getAbove, _tree.logAddAbove);
+	      this.addOrSelect(e, _tree.getAbove, _tree.logAddAbove);
 	    }
 	  }, {
 	    key: 'addChildOrRight',
 	    value: function addChildOrRight(e) {
-	      var currentlyFocused = this.state.currentlyFocused;
-	      var newId = _guid2.default.raw();
-	
-	      var logs = (0, _tree.logAddRight)(this.state.logs, currentlyFocused, {
-	        id: newId,
-	        text: ''
-	      });
-	
-	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs),
-	        currentlyFocused: newId,
-	        currentlyEditing: null
-	      });
-	
-	      e.preventDefault();
+	      this.addOrSelect(e, _tree.getFirstRightOf, _tree.logAddRight);
 	    }
 	  }, {
-	    key: 'addSiblingOrSelect',
-	    value: function addSiblingOrSelect(e, targetFunction, logFunction) {
+	    key: 'addOrSelect',
+	    value: function addOrSelect(e, targetFunction, logFunction) {
 	      var currentlyFocused = this.state.currentlyFocused;
 	      var tree = this.state.tree;
 	      var target = targetFunction(tree, currentlyFocused);
@@ -661,20 +646,32 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'left',
+	    value: function left(e) {
+	      var row = (0, _tree.findRow)(this.state.tree, this.state.currentlyFocused);
+	      if (row.parentId != null) this.setState({
+	        currentlyFocused: row.parentId,
+	        currentlyEditing: null
+	      });
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'cut',
-	    value: function cut() {
+	    value: function cut(e) {
 	      if (this.state.tree.length == 1) return;
 	
-	      var prevOrNext = (0, _tree.getAbove)(this.state.tree, this.state.currentlyFocused);
+	      var prevOrNextOrLeft = (0, _tree.getAbove)(this.state.tree, this.state.currentlyFocused);
 	
-	      prevOrNext = prevOrNext || (0, _tree.getBelow)(this.state.tree, this.state.currentlyFocused);
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getBelow)(this.state.tree, this.state.currentlyFocused);
+	
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(this.state.tree, this.state.currentlyFocused);
 	
 	      var logs = (0, _tree.logCut)(this.state.logs, this.state.currentlyFocused);
 	
 	      this.setState({
 	        logs: logs,
 	        tree: (0, _tree.replay)(logs),
-	        currentlyFocused: prevOrNext.id,
+	        currentlyFocused: prevOrNextOrLeft.id,
 	        currentlyEditing: null
 	      });
 	
@@ -699,6 +696,7 @@
 	      key('j', this.addSiblingOrMoveBelow.bind(this));
 	      key('k', this.addSiblingOrMoveAbove.bind(this));
 	      key('l', this.addChildOrRight.bind(this));
+	      key('h', this.left.bind(this));
 	      key('x', this.cut.bind(this));
 	    }
 	  }, {
@@ -20503,6 +20501,7 @@
 	exports.findRow = findRow;
 	exports.getAbove = getAbove;
 	exports.getBelow = getBelow;
+	exports.getLeft = getLeft;
 	exports.split = split;
 	exports.combine = combine;
 	exports.addBelow = addBelow;
@@ -20511,6 +20510,7 @@
 	exports.cut = cut;
 	exports.addRight = addRight;
 	exports.getRightOf = getRightOf;
+	exports.getFirstRightOf = getFirstRightOf;
 	exports.replay = replay;
 	exports.logAdd = logAdd;
 	exports.logAddBelow = logAddBelow;
@@ -20567,6 +20567,14 @@
 	  return (0, _lodash.first)(sort(rowsBelow(table, row.order, row.parentId)));
 	}
 	
+	function getLeft(table, id) {
+	  var row = findRow(table, id);
+	
+	  if (!row.parentId) return null;
+	
+	  return findRow(table, row.parentId);
+	}
+	
 	function split(table, onId) {
 	  var on = findRow(table, onId);
 	  var above = rowsAbove(table, on.order);
@@ -20618,6 +20626,10 @@
 	
 	function getRightOf(table, rightOfId) {
 	  return (0, _lodash.filter)(table, { parentId: rightOfId });
+	}
+	
+	function getFirstRightOf(table, rightOfId) {
+	  return (0, _lodash.first)(getRightOf(table, rightOfId));
 	}
 	
 	function replay(logs) {

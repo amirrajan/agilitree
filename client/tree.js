@@ -4,11 +4,12 @@ import {
   first,
   sortBy,
   last,
-  concat
+  concat,
+  difference
 } from 'lodash';
 
-function newRow(id, text, order) {
-  return { id, text, order };
+function newRow(id, text, order, parentId) {
+  return { id, text, order, parentId };
 }
 
 export function add(table, row) {
@@ -17,7 +18,8 @@ export function add(table, row) {
     newRow(
       row.id,
       row.text,
-      table.length + 1));
+      row.order || table.length + 1,
+      row.parentId || null));
 }
 
 export function findRow(table, id) {
@@ -26,34 +28,49 @@ export function findRow(table, id) {
 
 function sort(table) { return sortBy(table, 'order'); }
 
-function rowsAbove(table, order) {
-  return filter(table, r => r.order < order)
+function rowsAbove(table, order, parentId) {
+  return filter(
+    rowsWithParentId(table, parentId),
+    r => r.order < order);
 }
 
-function rowsBelow(table, order) {
-  return filter(table, r => r.order > order)
+function rowsBelow(table, order, parentId) {
+  return filter(
+    rowsWithParentId(table, parentId),
+    r => r.order > order);
+}
+
+function rowsWithParentId(table, parentId) {
+  return filter(table, r => r.parentId == parentId);
 }
 
 export function getAbove(table, id) {
-  return last(sort(rowsAbove(table, findRow(table, id).order)));
+  var row = findRow(table, id);
+
+  return last(sort(rowsAbove(table, row.order, row.parentId)));
 }
 
 export function getBelow(table, id) {
-  return first(sort(rowsBelow(table, findRow(table, id).order)));
+  var row = findRow(table, id);
+
+  return first(sort(rowsBelow(table, row.order, row.parentId)));
 }
 
 export function split(table, onId) {
   var on = findRow(table, onId);
+  var above = rowsAbove(table, on.order);
+  var below = rowsBelow(table, on.order);
+  var rest = difference(table, concat(above, on, below));
 
-  return {
-    above: rowsAbove(table, on.order),
-    on,
-    below: rowsBelow(table, on.order)
-  };
+  return { above, on, below, rest };
 }
 
 export function combine(workingSet) {
-  return concat(workingSet.above, workingSet.on, workingSet.below);
+  return concat(
+    workingSet.above,
+    workingSet.on,
+    workingSet.below,
+    workingSet.rest);
 }
 
 export function addBelow(table, belowId, row) {
@@ -66,7 +83,8 @@ export function addBelow(table, belowId, row) {
       newRow(
         row.id,
         row.text,
-        workingSet.on.order + 1)));
+        workingSet.on.order + 1,
+        workingSet.on.parentId)));
 }
 
 export function addAbove(table, aboveId, row) {
@@ -78,7 +96,8 @@ export function addAbove(table, aboveId, row) {
       combine(workingSet),
       newRow(row.id,
              row.text,
-             workingSet.on.order - 1)));
+             workingSet.on.order - 1,
+             workingSet.on.parentId)));
 }
 
 export function update(table, id, text) {
@@ -92,10 +111,9 @@ export function cut(table, id) {
 }
 
 export function addRight(table, rightOfId, row) {
-  var results = add(table, row);
-  var addedRow = findRow(results, row.id)
-  addedRow.parentId = rightOfId;
-  return results;
+  row.order = rowsWithParentId(table, rightOfId).length + 1;
+  row.parentId = rightOfId
+  return add(table, row);
 }
 
 export function getRightOf(table, rightOfId) {

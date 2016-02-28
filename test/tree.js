@@ -1,4 +1,4 @@
-//fswatch test/tree.js | xargs -n1 -I{} mocha --compilers js:babel-register
+//fswatch test/tree.js test/tree-children.js | xargs -n1 -I{} mocha --compilers js:babel-register
 
 import { uniqueId } from 'lodash';
 import {
@@ -37,9 +37,9 @@ describe('tree', function () {
     logs = logAddBelow(logs, row1.id, row3);
 
     var expectedStructure = [
-      { id: row1.id, text: row1.text, order: 1 },
-      { id: row3.id, text: row3.text, order: 2 },
-      { id: row2.id, text: row2.text, order: 3 }
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row3.id, text: row3.text, order: 2, parentId: null },
+      { id: row2.id, text: row2.text, order: 3, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);
@@ -55,9 +55,9 @@ describe('tree', function () {
     logs = logAddAbove(logs, row1.id, row3);
 
     var expectedStructure = [
-      { id: row2.id, text: row2.text, order: -1 },
-      { id: row3.id, text: row3.text, order: 0 },
-      { id: row1.id, text: row1.text, order: 1 }
+      { id: row2.id, text: row2.text, order: -1, parentId: null  },
+      { id: row3.id, text: row3.text, order: 0, parentId: null },
+      { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);
@@ -71,7 +71,7 @@ describe('tree', function () {
     logs = logUpdate(logs, row.id, 'say hello');
 
     var expectedStructure = [
-      { id: row.id, text: 'say hello', order: 1 }
+      { id: row.id, text: 'say hello', order: 1, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);
@@ -114,33 +114,10 @@ describe('tree', function () {
     logs = logCut(logs, row2.id);
 
     var expectedStructure = [
-      { id: row1.id, text: row1.text, order: 1 }
+      { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);
   });
 
-  specify('adding children', function() {
-    var row1 = newRow('root');
-    var row2 = newRow('foo');
-
-    var logs = logAdd([ ], row1);
-    logs = logAddRight(logs, row1.id, row2);
-
-    var expectedStructure = [
-      { id: row1.id, text: row1.text, order: 1 },
-      { id: row2.id, text: row2.text, order: 2, parentId: row1.id }
-    ];
-
-    var tree = replay(logs);
-    areSame(tree, expectedStructure);
-
-    var right = getRightOf(tree, row1.id);
-
-    var expectedRight = [
-      { id: row2.id, text: row2.text, order: 2, parentId: row1.id }
-    ];
-
-    areSame(right, expectedRight);
-  });
 });

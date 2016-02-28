@@ -6,12 +6,11 @@ import {
   logAddBelow,
   logAddAbove,
   logUpdate,
-  logAddRight,
   logCut,
   replay,
   getAbove,
   getBelow,
-  getRightOf
+  logPasteBelow
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -105,7 +104,7 @@ describe('tree', function () {
     assert.equal(result, row2.id);
   });
 
-  specify('delete', function() {
+  specify('cut', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
 
@@ -120,4 +119,41 @@ describe('tree', function () {
     areSame(replay(logs), expectedStructure);
   });
 
+  specify('paste below', function() {
+    var row1 = newRow('root');
+    var row2 = newRow('foo');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logCut(logs, row2.id);
+    logs = logPasteBelow(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row2.id, text: row2.text, order: 2, parentId: null }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+  });
+
+  specify.only('paste multiple', function() {
+    var row1 = newRow('root');
+    var row2 = newRow('foo');
+    var row3 = newRow('bar');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+    logs = logCut(logs, row2.id);
+    logs = logCut(logs, row3.id);
+    logs = logPasteBelow(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row2.id, text: row2.text, order: 2, parentId: null },
+      { id: row3.id, text: row3.text, order: 3, parentId: null }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+  });
 });

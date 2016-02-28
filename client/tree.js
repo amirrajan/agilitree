@@ -5,7 +5,8 @@ import {
   sortBy,
   last,
   concat,
-  difference
+  difference,
+  reverse
 } from 'lodash';
 
 function newRow(id, text, order, parentId) {
@@ -132,6 +133,26 @@ export function cut(table, id) {
   return filter(table, t => t.id != id);
 }
 
+export function pasteBelow(table, belowId, rows) {
+  var tempTable = table;
+
+  each(reverse(rows), row => {
+    var workingSet = split(tempTable, belowId);
+    each(workingSet.below, r => r.order += 1);
+
+    tempTable = sort(
+      concat(
+        combine(workingSet),
+        newRow(
+          row.id,
+          row.text,
+          workingSet.on.order + 1,
+          workingSet.on.parentId)));
+  });
+
+ return tempTable;
+}
+
 export function addRight(table, rightOfId, row) {
   row.order = rowsWithParentId(table, rightOfId).length + 1;
   row.parentId = rightOfId
@@ -147,6 +168,7 @@ export function getFirstRightOf(table, rightOfId) {
 }
 
 export function replay(logs, startingTable = [ ]) {
+  var clipBoard = [];
   each(logs, l => {
     if(l.action == 'add') {
       startingTable = add(startingTable, l.row);
@@ -157,9 +179,13 @@ export function replay(logs, startingTable = [ ]) {
     } else if (l.action == 'update') {
       startingTable = update(startingTable, l.id, l.text);
     } else if (l.action == 'cut') {
+      clipBoard.push(findRow(startingTable, l.id));
       startingTable = cut(startingTable, l.id);
     } else if (l.action == 'addRight') {
       startingTable = addRight(startingTable, l.rightOfId, l.row);
+    } else if (l.action == 'pasteBelow') {
+      startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
+      clipBoard = [];
     }
   });
 
@@ -188,4 +214,8 @@ export function logCut(logs, id) {
 
 export function logAddRight(logs, rightOfId, row) {
   return concat(logs, { action: 'addRight', rightOfId, row });
+}
+
+export function logPasteBelow(logs, belowId) {
+  return concat(logs, { action: 'pasteBelow', belowId });
 }

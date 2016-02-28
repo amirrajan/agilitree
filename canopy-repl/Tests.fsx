@@ -127,6 +127,16 @@ let test_suite _ =
     reload ()
     "[data-uia='tree']" == "life3"
 
+  let o_and_O_works _ =
+    press "o"
+    "[data-uia-todo]" << "life3"
+    press esc
+    press "k"
+    press "O"
+    "[data-uia-todo]" << "life1"
+    press esc
+    "[data-uia='tree']" == "life1\nroot\nlife3"
+
   beforeTest ()
   updating_works ()
 
@@ -141,6 +151,9 @@ let test_suite _ =
 
   beforeTest ()
   local_storage_works ()
+
+  beforeTest ()
+  o_and_O_works ()
 
 let go _ =
   openBrowser()

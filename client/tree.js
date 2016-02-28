@@ -64,6 +64,10 @@ export function getLeft(table, id) {
   return findRow(table, row.parentId);
 }
 
+export function getRoot(table) {
+  return first(filter(table, r => !r.parentId));
+}
+
 export function split(table, onId) {
   var on = findRow(table, onId);
   var above = rowsAbove(table, on.order);

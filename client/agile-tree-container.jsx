@@ -13,7 +13,8 @@ import {
   findRow,
   getBelow,
   getLeft,
-  getFirstRightOf
+  getFirstRightOf,
+  getRoot
 } from './tree.js';
 
 import { map, first, filter } from 'lodash';
@@ -127,14 +128,22 @@ class AgileTreeContainer extends Component {
       logs,
       tree,
       currentlyEditing: null,
-      currentlyFocused: first(filter(tree, r => !r.parentId)).id
+      currentlyFocused: this.firstRootNode(tree)
     };
+  }
+
+  firstRootNode(tree) {
+    return getRoot(tree).id;
   }
 
   setState(o) {
     super.setState(o);
 
     if(o.logs) localStorage.setItem('logs', JSON.stringify(o.logs));
+  }
+
+  defaultSetup(id) {
+    return logAdd([ ], { id, text: 'root' });
   }
 
   getLogsFromLocalStorage() {
@@ -145,17 +154,14 @@ class AgileTreeContainer extends Component {
       logs = JSON.parse(logs);
 
       if(logs.length == 0) {
-        logs = [ ];
-        logs = logAdd(logs, { id: firstId, text: 'root' });
+        logs = this.defaultSetup(firstId);
       }
     } catch(e) {
-      logs = [ ];
-      logs = logAdd(logs, { id: firstId, text: 'root' });
+        logs = this.defaultSetup(firstId);
     }
 
     if(!logs) {
-      logs = [ ];
-      logs = logAdd(logs, { id: firstId, text: 'root' });
+      logs = this.defaultSetup(firstId);
 
       localStorage.setItem('logs', JSON.stringify(logs));
     }
@@ -164,8 +170,8 @@ class AgileTreeContainer extends Component {
   }
 
   edit(e) {
-    e.preventDefault();
     this.setState({ currentlyEditing: this.state.currentlyFocused });
+    e.preventDefault();
   }
 
   addSiblingOrMoveBelow(e) {
@@ -182,9 +188,10 @@ class AgileTreeContainer extends Component {
 
   root(e) {
     this.setState({
-      currentlyFocused: first(filter(this.state.tree, r => !r.parentId)).id,
+      currentlyFocused: this.firstRootNode(this.state.tree),
       currentlyEditing: null
     });
+
     e.preventDefault();
   }
 

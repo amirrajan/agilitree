@@ -564,7 +564,7 @@
 	    value: function setState(o) {
 	      _get(Object.getPrototypeOf(AgileTreeContainer.prototype), 'setState', this).call(this, o);
 	
-	      localStorage.setItem('logs', JSON.stringify(o.logs));
+	      if (o.logs) localStorage.setItem('logs', JSON.stringify(o.logs));
 	    }
 	  }, {
 	    key: 'getLogsFromLocalStorage',
@@ -629,7 +629,10 @@
 	      } else {
 	        var current = (0, _tree.findRow)(tree, currentlyFocused);
 	
-	        if (current && current.text == '') return;
+	        if (current && current.text == '') {
+	          e.preventDefault();
+	          return;
+	        }
 	
 	        var newId = _guid2.default.raw();
 	
@@ -649,16 +652,23 @@
 	    key: 'left',
 	    value: function left(e) {
 	      var row = (0, _tree.findRow)(this.state.tree, this.state.currentlyFocused);
-	      if (row.parentId != null) this.setState({
-	        currentlyFocused: row.parentId,
-	        currentlyEditing: null
-	      });
+	
+	      if (row.parentId != null) {
+	        this.setState({
+	          currentlyFocused: row.parentId,
+	          currentlyEditing: null
+	        });
+	      }
+	
 	      e.preventDefault();
 	    }
 	  }, {
 	    key: 'cut',
 	    value: function cut(e) {
-	      if (this.state.tree.length == 1) return;
+	      if (this.state.tree.length == 1) {
+	        e.preventDefault();
+	        return;
+	      }
 	
 	      var prevOrNextOrLeft = (0, _tree.getAbove)(this.state.tree, this.state.currentlyFocused);
 	

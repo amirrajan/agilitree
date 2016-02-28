@@ -645,7 +645,7 @@
 	        logs: logs,
 	        tree: (0, _tree.replay)(logs),
 	        currentlyFocused: newId,
-	        currentlyEditing: null
+	        currentlyEditing: newId
 	      });
 	
 	      e.preventDefault();

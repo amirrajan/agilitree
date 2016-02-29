@@ -127,10 +127,16 @@ class AgileTreeContainer extends Component {
     super();
 
     var logs = this.getLogsFromLocalStorage();
-    var tree = replay(logs);
+
+    var appState = {
+      logs,
+      clipBoard: [ ]
+    };
+
+    var tree = replay(appState);
 
     this.state = {
-      logs,
+      appState,
       tree,
       currentlyEditing: null,
       currentlyFocused: this.firstRootNode(tree)
@@ -144,11 +150,11 @@ class AgileTreeContainer extends Component {
   setState(o) {
     super.setState(o);
 
-    if(o.logs) localStorage.setItem('logs', JSON.stringify(o.logs));
+    if(o.appState && o.appState.logs) localStorage.setItem('logs', JSON.stringify(o.appState.logs));
   }
 
   defaultSetup(id) {
-    return logAdd([ ], { id, text: 'root' });
+    return logAdd([ ], { id, text: 'root' }).logs;
   }
 
   getLogsFromLocalStorage() {
@@ -203,23 +209,23 @@ class AgileTreeContainer extends Component {
   addSiblingAboveBelow(e) {
     var currentlyFocused = this.state.currentlyFocused;
     var newId = Guid.raw();
-    var logs = this.state.logs;
+    var appState = this.state.appState;
 
     if(e.shiftKey) {
-      logs = logAddAbove(
-        logs,
+      appState = logAddAbove(
+        appState,
         currentlyFocused,
         { id: newId, text: '' });
     } else {
-      logs = logAddBelow(
-        logs,
+      appState = logAddBelow(
+        appState,
         currentlyFocused,
         { id: newId, text: '' });
     }
 
     this.setState({
-      logs,
-      tree: replay(logs),
+      appState,
+      tree: replay(appState),
       currentlyFocused: newId,
       currentlyEditing: newId
     });
@@ -240,14 +246,14 @@ class AgileTreeContainer extends Component {
     } else {
       var newId = Guid.raw();
 
-      var logs = logFunction(
-        this.state.logs,
+      var appState = logFunction(
+        this.state.appState,
         currentlyFocused,
         { id: newId, text: '' });
 
       this.setState({
-        logs,
-        tree: replay(logs),
+        appState,
+        tree: replay(appState),
         currentlyFocused: newId,
         currentlyEditing: null
       });
@@ -289,11 +295,11 @@ class AgileTreeContainer extends Component {
 
     if(!prevOrNextOrLeft) return;
 
-    var logs = logCut(this.state.logs, this.state.currentlyFocused);
+    var appState = logCut(this.state.appState, this.state.currentlyFocused);
 
     this.setState({
-      logs,
-      tree: replay(logs),
+      appState,
+      tree: replay(appState),
       currentlyFocused: prevOrNextOrLeft.id,
       currentlyEditing: null
     });
@@ -321,11 +327,11 @@ class AgileTreeContainer extends Component {
 
     if(!prevOrNextOrLeft) return;
 
-    var logs = logDelete(this.state.logs, this.state.currentlyFocused);
+    var appState = logDelete(this.state.appState, this.state.currentlyFocused);
 
     this.setState({
-      logs,
-      tree: replay(logs),
+      appState,
+      tree: replay(appState),
       currentlyFocused: prevOrNextOrLeft.id,
       currentlyEditing: null
     });
@@ -334,14 +340,14 @@ class AgileTreeContainer extends Component {
   }
 
   save(newValue) {
-    var logs = logUpdate(
-      this.state.logs,
+    var appState = logUpdate(
+      this.state.appState,
       this.state.currentlyEditing,
       newValue);
 
     this.setState({
-      logs,
-      tree: replay(logs),
+      appState,
+      tree: replay(appState),
       currentlyFocused: this.state.currentlyEditing,
       currentlyEditing: null
     });
@@ -366,30 +372,34 @@ class AgileTreeContainer extends Component {
 
   pasteAboveOrBelow(e) {
     var currentlyFocused = this.state.currentlyFocused;
-    var logs = this.state.logs;
+    var appState = this.state.appState;
 
     if(e.shiftKey) {
-      logs = logPasteAbove(logs, currentlyFocused)
+      appState = logPasteAbove(appState, currentlyFocused)
     } else {
-      logs = logPasteBelow(logs, currentlyFocused);
+      appState = logPasteBelow(appState, currentlyFocused);
     }
 
     this.setState({
-      logs,
-      tree: replay(logs)
+      appState,
+      tree: replay(appState)
     });
 
     e.preventDefault();
   }
 
   undo(e) {
-    if(this.state.logs.length == 1) return;
+    debugger;
+    if(this.state.appState.logs.length == 1) return;
 
-    var logs = difference(this.state.logs, [last(this.state.logs)]);
+    var appState = this.state.appState;
+    var logs = difference(this.state.appState.logs, [last(this.state.appState.logs)]);
+
+    appState.logs = logs;
 
     this.setState({
-      logs,
-      tree: replay(logs)
+      appState,
+      tree: replay(appState)
     });
 
     this.root(e);

@@ -129,7 +129,7 @@ export function update(table, id, text) {
   return table;
 }
 
-export function cut(table, id) {
+export function del(table, id) {
   return filter(table, t => t.id != id);
 }
 
@@ -150,7 +150,27 @@ export function pasteBelow(table, belowId, rows) {
           workingSet.on.parentId)));
   });
 
- return tempTable;
+  return tempTable;
+}
+
+export function pasteAbove(table, belowId, rows) {
+  var tempTable = table;
+
+  each(reverse(rows), (row, index) => {
+    var workingSet = split(tempTable, belowId);
+    each(workingSet.below, r => r.order -= 1);
+
+    tempTable = sort(
+      concat(
+        combine(workingSet),
+        newRow(
+          row.id,
+          row.text,
+          workingSet.on.order - (index + 1),
+          workingSet.on.parentId)));
+  });
+
+  return tempTable;
 }
 
 export function addRight(table, rightOfId, row) {
@@ -180,12 +200,17 @@ export function replay(logs, startingTable = [ ]) {
       startingTable = update(startingTable, l.id, l.text);
     } else if (l.action == 'cut') {
       clipBoard.push(findRow(startingTable, l.id));
-      startingTable = cut(startingTable, l.id);
+      startingTable = del(startingTable, l.id);
     } else if (l.action == 'addRight') {
       startingTable = addRight(startingTable, l.rightOfId, l.row);
     } else if (l.action == 'pasteBelow') {
       startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
       clipBoard = [];
+    } else if (l.action == 'pasteAbove'){
+      startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
+      clipBoard = [];
+    } else if (l.action == 'delete') {
+      startingTable = del(startingTable, l.id);
     }
   });
 
@@ -218,4 +243,12 @@ export function logAddRight(logs, rightOfId, row) {
 
 export function logPasteBelow(logs, belowId) {
   return concat(logs, { action: 'pasteBelow', belowId });
+}
+
+export function logPasteAbove(logs, belowId) {
+  return concat(logs, { action: 'pasteAbove', belowId });
+}
+
+export function logDelete(logs, id) {
+  return concat(logs, { action: 'delete', id });
 }

@@ -7,10 +7,12 @@ import {
   logAddAbove,
   logUpdate,
   logCut,
+  logDelete,
   replay,
   getAbove,
   getBelow,
-  logPasteBelow
+  logPasteBelow,
+  logPasteAbove
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -119,6 +121,22 @@ describe('tree', function () {
     areSame(replay(logs), expectedStructure);
   });
 
+  specify('delete', function() {
+    var row1 = newRow('root');
+    var row2 = newRow('foo');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logDelete(logs, row2.id);
+    logs = logPasteBelow(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, parentId: null }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+  });
+
   specify('paste below', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
@@ -136,7 +154,7 @@ describe('tree', function () {
     areSame(replay(logs), expectedStructure);
   });
 
-  specify.only('paste multiple', function() {
+  specify('paste multiple', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
     var row3 = newRow('bar');
@@ -152,6 +170,27 @@ describe('tree', function () {
       { id: row1.id, text: row1.text, order: 1, parentId: null },
       { id: row2.id, text: row2.text, order: 2, parentId: null },
       { id: row3.id, text: row3.text, order: 3, parentId: null }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+  });
+
+  specify('paste multiple above', function() {
+    var row1 = newRow('1');
+    var row2 = newRow('2');
+    var row3 = newRow('3');
+
+    var logs = logAdd([ ], row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+    logs = logCut(logs, row2.id);
+    logs = logCut(logs, row3.id);
+    logs = logPasteAbove(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row2.id, text: row2.text, order: -1, parentId: null },
+      { id: row3.id, text: row3.text, order: 0, parentId: null },
+      { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);

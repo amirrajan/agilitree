@@ -8,6 +8,7 @@ import {
   logAddRight,
   logUpdate,
   logCut,
+  logPasteBelow,
   replay,
   getAbove,
   findRow,
@@ -16,7 +17,9 @@ import {
   getFirstRightOf,
   getRoot,
   top,
-  bottom
+  bottom,
+  logDelete,
+  logPasteAbove
 } from './tree.js';
 
 import { map, filter } from 'lodash';
@@ -298,6 +301,38 @@ class AgileTreeContainer extends Component {
     e.preventDefault();
   }
 
+  delete(e) {
+    if(this.state.tree.length == 1) {
+      e.preventDefault();
+      return;
+    }
+
+    var prevOrNextOrLeft = getAbove(
+      this.state.tree,
+      this.state.currentlyFocused);
+
+    prevOrNextOrLeft = prevOrNextOrLeft || getBelow(
+      this.state.tree,
+      this.state.currentlyFocused);
+
+    prevOrNextOrLeft = prevOrNextOrLeft || getLeft(
+      this.state.tree,
+      this.state.currentlyFocused);
+
+    if(!prevOrNextOrLeft) return;
+
+    var logs = logDelete(this.state.logs, this.state.currentlyFocused);
+
+    this.setState({
+      logs,
+      tree: replay(logs),
+      currentlyFocused: prevOrNextOrLeft.id,
+      currentlyEditing: null
+    });
+
+    e.preventDefault();
+  }
+
   save(newValue) {
     var logs = logUpdate(
       this.state.logs,
@@ -329,6 +364,24 @@ class AgileTreeContainer extends Component {
     e.preventDefault();
   }
 
+  pasteAboveOrBelow(e) {
+    var currentlyFocused = this.state.currentlyFocused;
+    var logs = this.state.logs;
+
+    if(e.shiftKey) {
+      logs = logPasteAbove(logs, currentlyFocused)
+    } else {
+      logs = logPasteBelow(logs, currentlyFocused);
+    }
+
+    this.setState({
+      logs,
+      tree: replay(logs)
+    });
+
+    e.preventDefault();
+  }
+
   componentDidMount() {
     key('c', this.edit.bind(this));
     key('i', this.edit.bind(this));
@@ -337,11 +390,14 @@ class AgileTreeContainer extends Component {
     key('l', this.addChildOrRight.bind(this));
     key('h', this.left.bind(this));
     key('x', this.cut.bind(this));
+    key('d', this.delete.bind(this));
     key('o', this.addSiblingAboveBelow.bind(this));
     key('shift+o', this.addSiblingAboveBelow.bind(this));
     key('0', this.root.bind(this));
     key('g', this.topOrBottom.bind(this));
     key('shift+g', this.topOrBottom.bind(this));
+    key('p', this.pasteAboveOrBelow.bind(this));
+    key('shift+p', this.pasteAboveOrBelow.bind(this));
   }
 
   render() {
@@ -371,7 +427,10 @@ class AgileTreeContainer extends Component {
             <li>`g` move to top of current list</li>
             <li>`c`, `i` to change entry</li>
             <li>`ESC` to save entry</li>
+            <li>`d` delete entry</li>
             <li>`x` to cut entry</li>
+            <li>`p` paste below</li>
+            <li>`P` paste above</li>
           </ul>
         </div>
       </div>

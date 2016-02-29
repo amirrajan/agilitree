@@ -723,6 +723,33 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'delete',
+	    value: function _delete(e) {
+	      if (this.state.tree.length == 1) {
+	        e.preventDefault();
+	        return;
+	      }
+	
+	      var prevOrNextOrLeft = (0, _tree.getAbove)(this.state.tree, this.state.currentlyFocused);
+	
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getBelow)(this.state.tree, this.state.currentlyFocused);
+	
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(this.state.tree, this.state.currentlyFocused);
+	
+	      if (!prevOrNextOrLeft) return;
+	
+	      var logs = (0, _tree.logDelete)(this.state.logs, this.state.currentlyFocused);
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs),
+	        currentlyFocused: prevOrNextOrLeft.id,
+	        currentlyEditing: null
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'save',
 	    value: function save(newValue) {
 	      var logs = (0, _tree.logUpdate)(this.state.logs, this.state.currentlyEditing, newValue);
@@ -753,6 +780,25 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'pasteAboveOrBelow',
+	    value: function pasteAboveOrBelow(e) {
+	      var currentlyFocused = this.state.currentlyFocused;
+	      var logs = this.state.logs;
+	
+	      if (e.shiftKey) {
+	        logs = (0, _tree.logPasteAbove)(logs, currentlyFocused);
+	      } else {
+	        logs = (0, _tree.logPasteBelow)(logs, currentlyFocused);
+	      }
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs)
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      key('c', this.edit.bind(this));
@@ -762,11 +808,14 @@
 	      key('l', this.addChildOrRight.bind(this));
 	      key('h', this.left.bind(this));
 	      key('x', this.cut.bind(this));
+	      key('d', this.delete.bind(this));
 	      key('o', this.addSiblingAboveBelow.bind(this));
 	      key('shift+o', this.addSiblingAboveBelow.bind(this));
 	      key('0', this.root.bind(this));
 	      key('g', this.topOrBottom.bind(this));
 	      key('shift+g', this.topOrBottom.bind(this));
+	      key('p', this.pasteAboveOrBelow.bind(this));
+	      key('shift+p', this.pasteAboveOrBelow.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -851,7 +900,22 @@
 	            React.createElement(
 	              'li',
 	              null,
+	              '`d` delete entry'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
 	              '`x` to cut entry'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              '`p` paste below'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              '`P` paste above'
 	            )
 	          )
 	        )
@@ -20604,7 +20668,9 @@
 	exports.addBelow = addBelow;
 	exports.addAbove = addAbove;
 	exports.update = update;
-	exports.cut = cut;
+	exports.del = del;
+	exports.pasteBelow = pasteBelow;
+	exports.pasteAbove = pasteAbove;
 	exports.addRight = addRight;
 	exports.getRightOf = getRightOf;
 	exports.getFirstRightOf = getFirstRightOf;
@@ -20615,6 +20681,9 @@
 	exports.logUpdate = logUpdate;
 	exports.logCut = logCut;
 	exports.logAddRight = logAddRight;
+	exports.logPasteBelow = logPasteBelow;
+	exports.logPasteAbove = logPasteAbove;
+	exports.logDelete = logDelete;
 	
 	var _lodash = __webpack_require__(162);
 	
@@ -20723,10 +20792,40 @@
 	  return table;
 	}
 	
-	function cut(table, id) {
+	function del(table, id) {
 	  return (0, _lodash.filter)(table, function (t) {
 	    return t.id != id;
 	  });
+	}
+	
+	function pasteBelow(table, belowId, rows) {
+	  var tempTable = table;
+	
+	  (0, _lodash.each)((0, _lodash.reverse)(rows), function (row) {
+	    var workingSet = split(tempTable, belowId);
+	    (0, _lodash.each)(workingSet.below, function (r) {
+	      return r.order += 1;
+	    });
+	
+	    tempTable = sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order + 1, workingSet.on.parentId)));
+	  });
+	
+	  return tempTable;
+	}
+	
+	function pasteAbove(table, belowId, rows) {
+	  var tempTable = table;
+	
+	  (0, _lodash.each)((0, _lodash.reverse)(rows), function (row, index) {
+	    var workingSet = split(tempTable, belowId);
+	    (0, _lodash.each)(workingSet.below, function (r) {
+	      return r.order -= 1;
+	    });
+	
+	    tempTable = sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order - (index + 1), workingSet.on.parentId)));
+	  });
+	
+	  return tempTable;
 	}
 	
 	function addRight(table, rightOfId, row) {
@@ -20746,6 +20845,7 @@
 	function replay(logs) {
 	  var startingTable = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
 	
+	  var clipBoard = [];
 	  (0, _lodash.each)(logs, function (l) {
 	    if (l.action == 'add') {
 	      startingTable = add(startingTable, l.row);
@@ -20756,9 +20856,18 @@
 	    } else if (l.action == 'update') {
 	      startingTable = update(startingTable, l.id, l.text);
 	    } else if (l.action == 'cut') {
-	      startingTable = cut(startingTable, l.id);
+	      clipBoard.push(findRow(startingTable, l.id));
+	      startingTable = del(startingTable, l.id);
 	    } else if (l.action == 'addRight') {
 	      startingTable = addRight(startingTable, l.rightOfId, l.row);
+	    } else if (l.action == 'pasteBelow') {
+	      startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
+	      clipBoard = [];
+	    } else if (l.action == 'pasteAbove') {
+	      startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
+	      clipBoard = [];
+	    } else if (l.action == 'delete') {
+	      startingTable = del(startingTable, l.id);
 	    }
 	  });
 	
@@ -20787,6 +20896,18 @@
 	
 	function logAddRight(logs, rightOfId, row) {
 	  return (0, _lodash.concat)(logs, { action: 'addRight', rightOfId: rightOfId, row: row });
+	}
+	
+	function logPasteBelow(logs, belowId) {
+	  return (0, _lodash.concat)(logs, { action: 'pasteBelow', belowId: belowId });
+	}
+	
+	function logPasteAbove(logs, belowId) {
+	  return (0, _lodash.concat)(logs, { action: 'pasteAbove', belowId: belowId });
+	}
+	
+	function logDelete(logs, id) {
+	  return (0, _lodash.concat)(logs, { action: 'delete', id: id });
 	}
 
 /***/ },

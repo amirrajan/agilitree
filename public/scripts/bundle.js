@@ -810,7 +810,7 @@
 	        tree: (0, _tree.replay)(logs)
 	      });
 	
-	      e.preventDefault();
+	      this.root(e);
 	    }
 	  }, {
 	    key: 'componentDidMount',

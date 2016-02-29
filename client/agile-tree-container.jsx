@@ -392,7 +392,7 @@ class AgileTreeContainer extends Component {
       tree: replay(logs)
     });
 
-    e.preventDefault();
+    this.root(e);
   }
 
   componentDidMount() {

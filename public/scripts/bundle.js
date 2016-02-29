@@ -799,6 +799,20 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'undo',
+	    value: function undo(e) {
+	      if (this.state.logs.length == 1) return;
+	
+	      var logs = (0, _lodash.difference)(this.state.logs, [(0, _lodash.last)(this.state.logs)]);
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs)
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      key('c', this.edit.bind(this));
@@ -816,6 +830,7 @@
 	      key('shift+g', this.topOrBottom.bind(this));
 	      key('p', this.pasteAboveOrBelow.bind(this));
 	      key('shift+p', this.pasteAboveOrBelow.bind(this));
+	      key('u', this.undo.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -823,102 +838,176 @@
 	      return React.createElement(
 	        'div',
 	        null,
-	        React.createElement(Tree, {
-	          uia: 'tree',
-	          tree: this.state.tree,
-	          save: this.save.bind(this),
-	          currentlyFocused: this.state.currentlyFocused,
-	          currentlyEditing: this.state.currentlyEditing
-	        }),
+	        React.createElement(
+	          'h1',
+	          null,
+	          'Agilitree - The Todo List for Vim Users'
+	        ),
 	        React.createElement(
 	          'div',
-	          { id: 'usage' },
-	          'Usage:',
+	          null,
 	          React.createElement(
 	            'ul',
 	            null,
 	            React.createElement(
 	              'li',
 	              null,
-	              'disable vimium if you use that chrome plugin (you won\'t need it)'
+	              'chrome plugins: disable vimium for this page, install ',
+	              React.createElement(
+	                'a',
+	                { href: 'https://chrome.google.com/webstore/detail/wasavi/dgogifpkoilgiofhhhodbodcfgomelhe?hl=en-US', target: '_blank' },
+	                'wasavi'
+	              )
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`0` very top'
+	              React.createElement(
+	                'code',
+	                null,
+	                'k'
+	              ),
+	              ' to move up, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'j'
+	              ),
+	              ' down, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'l'
+	              ),
+	              ' to move right, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'h'
+	              ),
+	              ' left',
+	              React.createElement('br', null)
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`O` add above'
+	              React.createElement(
+	                'code',
+	                null,
+	                '0 (zero)'
+	              ),
+	              ' to move to the very top, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'g'
+	              ),
+	              ' to move to top of current, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'G'
+	              ),
+	              ' bottom of current'
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`o` add below'
+	              React.createElement(
+	                'code',
+	                null,
+	                'c or i'
+	              ),
+	              ' to change item, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'esc'
+	              ),
+	              ' to save'
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`j` to move down'
+	              React.createElement(
+	                'code',
+	                null,
+	                'o'
+	              ),
+	              ' to insert below, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'O'
+	              ),
+	              ' for above'
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`k` to move up'
+	              React.createElement(
+	                'code',
+	                null,
+	                'x'
+	              ),
+	              ' to cut, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'p'
+	              ),
+	              ' to paste below, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'P'
+	              ),
+	              ' pastes above'
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`l` to move right'
+	              React.createElement(
+	                'code',
+	                null,
+	                'd'
+	              ),
+	              ' to delete, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'u'
+	              ),
+	              ' to undo'
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`h` to move left'
+	              React.createElement(
+	                'code',
+	                null,
+	                'console.log(localStorage[\'logs\']);'
+	              )
 	            ),
 	            React.createElement(
 	              'li',
 	              null,
-	              '`G` move to bottom of current list'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`g` move to top of current list'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`c`, `i` to change entry'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`ESC` to save entry'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`d` delete entry'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`x` to cut entry'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`p` paste below'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              '`P` paste above'
+	              React.createElement(
+	                'a',
+	                { href: 'http://github.com/amirrajan/agilitree', targe: '_blank' },
+	                'source on github'
+	              )
 	            )
 	          )
-	        )
+	        ),
+	        React.createElement('hr', null),
+	        React.createElement(Tree, {
+	          uia: 'tree',
+	          tree: this.state.tree,
+	          save: this.save.bind(this),
+	          currentlyFocused: this.state.currentlyFocused,
+	          currentlyEditing: this.state.currentlyEditing
+	        })
 	      );
 	    }
 	  }]);

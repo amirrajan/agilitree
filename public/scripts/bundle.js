@@ -549,10 +549,16 @@
 	    var _this4 = _possibleConstructorReturn(this, Object.getPrototypeOf(AgileTreeContainer).call(this));
 	
 	    var logs = _this4.getLogsFromLocalStorage();
-	    var tree = (0, _tree.replay)(logs);
+	
+	    var appState = {
+	      logs: logs,
+	      clipBoard: []
+	    };
+	
+	    var tree = (0, _tree.replay)(appState);
 	
 	    _this4.state = {
-	      logs: logs,
+	      appState: appState,
 	      tree: tree,
 	      currentlyEditing: null,
 	      currentlyFocused: _this4.firstRootNode(tree)
@@ -570,12 +576,12 @@
 	    value: function setState(o) {
 	      _get(Object.getPrototypeOf(AgileTreeContainer.prototype), 'setState', this).call(this, o);
 	
-	      if (o.logs) localStorage.setItem('logs', JSON.stringify(o.logs));
+	      if (o.appState && o.appState.logs) localStorage.setItem('logs', JSON.stringify(o.appState.logs));
 	    }
 	  }, {
 	    key: 'defaultSetup',
 	    value: function defaultSetup(id) {
-	      return (0, _tree.logAdd)([], { id: id, text: 'root' });
+	      return (0, _tree.logAdd)([], { id: id, text: 'root' }).logs;
 	    }
 	  }, {
 	    key: 'getLogsFromLocalStorage',
@@ -637,17 +643,17 @@
 	    value: function addSiblingAboveBelow(e) {
 	      var currentlyFocused = this.state.currentlyFocused;
 	      var newId = _guid2.default.raw();
-	      var logs = this.state.logs;
+	      var appState = this.state.appState;
 	
 	      if (e.shiftKey) {
-	        logs = (0, _tree.logAddAbove)(logs, currentlyFocused, { id: newId, text: '' });
+	        appState = (0, _tree.logAddAbove)(appState, currentlyFocused, { id: newId, text: '' });
 	      } else {
-	        logs = (0, _tree.logAddBelow)(logs, currentlyFocused, { id: newId, text: '' });
+	        appState = (0, _tree.logAddBelow)(appState, currentlyFocused, { id: newId, text: '' });
 	      }
 	
 	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs),
+	        appState: appState,
+	        tree: (0, _tree.replay)(appState),
 	        currentlyFocused: newId,
 	        currentlyEditing: newId
 	      });
@@ -669,11 +675,11 @@
 	      } else {
 	        var newId = _guid2.default.raw();
 	
-	        var logs = logFunction(this.state.logs, currentlyFocused, { id: newId, text: '' });
+	        var appState = logFunction(this.state.appState, currentlyFocused, { id: newId, text: '' });
 	
 	        this.setState({
-	          logs: logs,
-	          tree: (0, _tree.replay)(logs),
+	          appState: appState,
+	          tree: (0, _tree.replay)(appState),
 	          currentlyFocused: newId,
 	          currentlyEditing: null
 	        });
@@ -711,11 +717,11 @@
 	
 	      if (!prevOrNextOrLeft) return;
 	
-	      var logs = (0, _tree.logCut)(this.state.logs, this.state.currentlyFocused);
+	      var appState = (0, _tree.logCut)(this.state.appState, this.state.currentlyFocused);
 	
 	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs),
+	        appState: appState,
+	        tree: (0, _tree.replay)(appState),
 	        currentlyFocused: prevOrNextOrLeft.id,
 	        currentlyEditing: null
 	      });
@@ -738,11 +744,11 @@
 	
 	      if (!prevOrNextOrLeft) return;
 	
-	      var logs = (0, _tree.logDelete)(this.state.logs, this.state.currentlyFocused);
+	      var appState = (0, _tree.logDelete)(this.state.appState, this.state.currentlyFocused);
 	
 	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs),
+	        appState: appState,
+	        tree: (0, _tree.replay)(appState),
 	        currentlyFocused: prevOrNextOrLeft.id,
 	        currentlyEditing: null
 	      });
@@ -752,11 +758,11 @@
 	  }, {
 	    key: 'save',
 	    value: function save(newValue) {
-	      var logs = (0, _tree.logUpdate)(this.state.logs, this.state.currentlyEditing, newValue);
+	      var appState = (0, _tree.logUpdate)(this.state.appState, this.state.currentlyEditing, newValue);
 	
 	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs),
+	        appState: appState,
+	        tree: (0, _tree.replay)(appState),
 	        currentlyFocused: this.state.currentlyEditing,
 	        currentlyEditing: null
 	      });
@@ -783,17 +789,17 @@
 	    key: 'pasteAboveOrBelow',
 	    value: function pasteAboveOrBelow(e) {
 	      var currentlyFocused = this.state.currentlyFocused;
-	      var logs = this.state.logs;
+	      var appState = this.state.appState;
 	
 	      if (e.shiftKey) {
-	        logs = (0, _tree.logPasteAbove)(logs, currentlyFocused);
+	        appState = (0, _tree.logPasteAbove)(appState, currentlyFocused);
 	      } else {
-	        logs = (0, _tree.logPasteBelow)(logs, currentlyFocused);
+	        appState = (0, _tree.logPasteBelow)(appState, currentlyFocused);
 	      }
 	
 	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs)
+	        appState: appState,
+	        tree: (0, _tree.replay)(appState)
 	      });
 	
 	      e.preventDefault();
@@ -801,13 +807,17 @@
 	  }, {
 	    key: 'undo',
 	    value: function undo(e) {
-	      if (this.state.logs.length == 1) return;
+	      debugger;
+	      if (this.state.appState.logs.length == 1) return;
 	
-	      var logs = (0, _lodash.difference)(this.state.logs, [(0, _lodash.last)(this.state.logs)]);
+	      var appState = this.state.appState;
+	      var logs = (0, _lodash.difference)(this.state.appState.logs, [(0, _lodash.last)(this.state.appState.logs)]);
+	
+	      appState.logs = logs;
 	
 	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs)
+	        appState: appState,
+	        tree: (0, _tree.replay)(appState)
 	      });
 	
 	      this.root(e);
@@ -20776,7 +20786,11 @@
 	}
 	
 	function add(table, row) {
-	  return (0, _lodash.concat)(table, newRow(row.id, row.text, row.order || table.length + 1, row.parentId || null));
+	  var table = table;
+	
+	  table = (0, _lodash.concat)(table, newRow(row.id, row.text, row.order || table.length + 1, row.parentId || null));
+	
+	  return table;
 	}
 	
 	function findRow(table, id) {
@@ -20926,11 +20940,11 @@
 	  return (0, _lodash.first)(getRightOf(table, rightOfId));
 	}
 	
-	function replay(logs) {
+	function replay(state) {
 	  var startingTable = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
 	
 	  var clipBoard = [];
-	  (0, _lodash.each)(logs, function (l) {
+	  (0, _lodash.each)(state.logs, function (l) {
 	    if (l.action == 'add') {
 	      startingTable = add(startingTable, l.row);
 	    } else if (l.action == 'addBelow') {
@@ -20958,40 +20972,49 @@
 	  return startingTable;
 	}
 	
-	function logAdd(logs, row) {
-	  return (0, _lodash.concat)(logs, { action: 'add', row: row });
+	function logAdd(state, row) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'add', row: row });
+	  return state;
 	}
 	
-	function logAddBelow(logs, belowId, row) {
-	  return (0, _lodash.concat)(logs, { action: 'addBelow', belowId: belowId, row: row });
+	function logAddBelow(state, belowId, row) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'addBelow', belowId: belowId, row: row });
+	  return state;
 	}
 	
-	function logAddAbove(logs, aboveId, row) {
-	  return (0, _lodash.concat)(logs, { action: 'addAbove', aboveId: aboveId, row: row });
+	function logAddAbove(state, aboveId, row) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'addAbove', aboveId: aboveId, row: row });
+	  return state;
 	}
 	
-	function logUpdate(logs, id, text) {
-	  return (0, _lodash.concat)(logs, { action: 'update', id: id, text: text });
+	function logUpdate(state, id, text) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'update', id: id, text: text });
+	  return state;
 	}
 	
-	function logCut(logs, id) {
-	  return (0, _lodash.concat)(logs, { action: 'cut', id: id });
+	function logCut(state, id) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'cut', id: id });
+	  return state;
 	}
 	
-	function logAddRight(logs, rightOfId, row) {
-	  return (0, _lodash.concat)(logs, { action: 'addRight', rightOfId: rightOfId, row: row });
+	function logAddRight(state, rightOfId, row) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'addRight', rightOfId: rightOfId, row: row });
+	  return state;
 	}
 	
-	function logPasteBelow(logs, belowId) {
-	  return (0, _lodash.concat)(logs, { action: 'pasteBelow', belowId: belowId });
+	function logPasteBelow(state, belowId) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'pasteBelow', belowId: belowId });
+	  return state;
 	}
 	
-	function logPasteAbove(logs, belowId) {
-	  return (0, _lodash.concat)(logs, { action: 'pasteAbove', belowId: belowId });
+	function logPasteAbove(state, belowId) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'pasteAbove', belowId: belowId });
+	  return state;
 	}
 	
-	function logDelete(logs, id) {
-	  return (0, _lodash.concat)(logs, { action: 'delete', id: id });
+	function logDelete(state, id) {
+	  state.logs = (0, _lodash.concat)(state.logs, { action: 'delete', id: id });
+	  return state;
 	}
 
 /***/ },

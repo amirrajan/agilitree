@@ -389,7 +389,6 @@ class AgileTreeContainer extends Component {
   }
 
   undo(e) {
-    debugger;
     if(this.state.appState.logs.length == 1) return;
 
     var appState = this.state.appState;

@@ -852,12 +852,7 @@
 	            React.createElement(
 	              'li',
 	              null,
-	              'chrome plugins: disable vimium for this page, install ',
-	              React.createElement(
-	                'a',
-	                { href: 'https://chrome.google.com/webstore/detail/wasavi/dgogifpkoilgiofhhhodbodcfgomelhe?hl=en-US', target: '_blank' },
-	                'wasavi'
-	              )
+	              'chrome plugins: disable vimium for this page'
 	            ),
 	            React.createElement(
 	              'li',

@@ -422,7 +422,7 @@ class AgileTreeContainer extends Component {
         <div>
           <ul>
             <li>
-              chrome plugins: disable vimium for this page, install <a href="https://chrome.google.com/webstore/detail/wasavi/dgogifpkoilgiofhhhodbodcfgomelhe?hl=en-US" target="_blank">wasavi</a>
+              chrome plugins: disable vimium for this page
             </li>
             <li>
               <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left<br />

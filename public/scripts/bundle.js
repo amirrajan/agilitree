@@ -989,7 +989,7 @@
 	              null,
 	              React.createElement(
 	                'a',
-	                { href: 'http://github.com/amirrajan/agilitree', targe: '_blank' },
+	                { href: 'http://github.com/amirrajan/agilitree', target: '_blank' },
 	                'source on github'
 	              )
 	            )

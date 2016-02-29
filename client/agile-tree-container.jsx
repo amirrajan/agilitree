@@ -445,7 +445,7 @@ class AgileTreeContainer extends Component {
             <li>
               <code>console.log(localStorage['logs']);</code>
             </li>
-            <li><a href="http://github.com/amirrajan/agilitree" targe ="_blank">source on github</a></li>
+            <li><a href="http://github.com/amirrajan/agilitree" target ="_blank">source on github</a></li>
           </ul>
         </div>
 

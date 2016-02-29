@@ -46,6 +46,10 @@ let exists selector =
 let clearCookies _ =
     browser.Manage().Cookies.DeleteAllCookies()
 
+let clearLocalStorage _ =
+  (js """window.localStorage['logs'] = null;""") |> ignore
+  ()
+
 let openBrowser _ =
   configuration.chromeDir <- "./"
   let options = Chrome.ChromeOptions()
@@ -95,3 +99,5 @@ press enter
 
 reload ()
 quit ()
+clearCookies ()
+clearLocalStorage ()

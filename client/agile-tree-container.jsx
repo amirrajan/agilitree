@@ -417,6 +417,40 @@ class AgileTreeContainer extends Component {
   render() {
     return (
       <div>
+        <h1>Agilitree - The Todo List for Vim Users</h1>
+
+        <div>
+          <ul>
+            <li>
+              chrome plugins: disable vimium for this page, install <a href="https://chrome.google.com/webstore/detail/wasavi/dgogifpkoilgiofhhhodbodcfgomelhe?hl=en-US" target="_blank">wasavi</a>
+            </li>
+            <li>
+              <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left<br />
+            </li>
+            <li>
+              <code>0 (zero)</code> to move to the very top, <code>g</code> to move to top of current, <code>G</code> bottom of current
+            </li>
+            <li>
+              <code>c or i</code> to change item, <code>esc</code> to save
+            </li>
+            <li>
+              <code>o</code> to insert below, <code>O</code> for above
+            </li>
+            <li>
+              <code>x</code> to cut, <code>p</code> to paste below, <code>P</code> pastes above
+            </li>
+            <li>
+              <code>d</code> to delete, <code>u</code> to undo
+            </li>
+            <li>
+              <code>console.log(localStorage['logs']);</code>
+            </li>
+            <li><a href="http://github.com/amirrajan/agilitree" targe ="_blank">source on github</a></li>
+          </ul>
+        </div>
+
+        <hr />
+
         <Tree
           uia='tree'
           tree={this.state.tree}
@@ -424,30 +458,6 @@ class AgileTreeContainer extends Component {
           currentlyFocused={this.state.currentlyFocused}
           currentlyEditing={this.state.currentlyEditing}
         />
-
-        <div id="usage">
-          Usage:
-
-          <ul>
-            <li>disable vimium if you use that chrome plugin (you won't need it)</li>
-            <li>`0` very top</li>
-            <li>`O` add above</li>
-            <li>`o` add below</li>
-            <li>`j` to move down</li>
-            <li>`k` to move up</li>
-            <li>`l` to move right</li>
-            <li>`h` to move left</li>
-            <li>`G` move to bottom of current list</li>
-            <li>`g` move to top of current list</li>
-            <li>`c`, `i` to change entry</li>
-            <li>`ESC` to save entry</li>
-            <li>`d` delete entry</li>
-            <li>`x` to cut entry</li>
-            <li>`p` paste below</li>
-            <li>`P` paste above</li>
-            <li>`u` undo</li>
-          </ul>
-        </div>
       </div>
     );
   }

@@ -86,56 +86,65 @@ let test_suite _ =
 
   let updating_works _ =
     press "c"
-    "[data-uia-todo]" << "life2"
+    "[data-uia-todo]" << "todo2"
     press esc
-    "[data-uia='tree']" =~ "life2"
+    "[data-uia='tree']" =~ "todo2"
 
   let adding_works _ =
     press "j"
     press "c"
-    "[data-uia-todo]" << "life3"
+    "[data-uia-todo]" << "todo3"
     press esc
 
     press "j"
     press "c"
-    "[data-uia-todo]" << "life4"
+    "[data-uia-todo]" << "todo4"
     press esc
 
     "[data-uia='tree']" =~ "root"
-    "[data-uia='tree']" =~ "life3"
-    "[data-uia='tree']" =~ "life4"
+    "[data-uia='tree']" =~ "todo3"
+    "[data-uia='tree']" =~ "todo4"
 
   let add_above_works _ =
     press "k"
     press "c"
-    "[data-uia-todo]" << "life3"
+    "[data-uia-todo]" << "todo3"
     press esc
-    "[data-uia='tree']" == "life3\nroot"
+    "[data-uia='tree']" == "todo3\nroot"
 
   let deleting_works _ =
     press "j"
     press "c"
-    "[data-uia-todo]" << "life3"
+    "[data-uia-todo]" << "todo3"
     press esc
     press "x"
     "[data-uia='tree']" == "root"
 
   let local_storage_works _ =
     press "c"
-    "[data-uia-todo]" << "life3"
+    "[data-uia-todo]" << "todo3"
     press esc
     reload ()
-    "[data-uia='tree']" == "life3"
+    "[data-uia='tree']" == "todo3"
 
   let o_and_O_works _ =
     press "o"
-    "[data-uia-todo]" << "life3"
+    "[data-uia-todo]" << "todo3"
     press esc
     press "k"
     press "O"
-    "[data-uia-todo]" << "life1"
+    "[data-uia-todo]" << "todo1"
     press esc
-    "[data-uia='tree']" == "life1\nroot\nlife3"
+    "[data-uia='tree']" == "todo1\nroot\ntodo3"
+
+  let undo_works _ =
+    press "o"
+    "[data-uia-todo]" << "todo3"
+    press esc
+    press "d"
+    "[data-uia='tree']" == "root"
+    press "u"
+    "[data-uia='tree']" == "root\ntodo3"
 
   beforeTest ()
   updating_works ()
@@ -154,6 +163,9 @@ let test_suite _ =
 
   beforeTest ()
   o_and_O_works ()
+
+  beforeTest ()
+  undo_works ()
 
 let go _ =
   openBrowser()

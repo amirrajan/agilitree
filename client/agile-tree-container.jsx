@@ -22,7 +22,7 @@ import {
   logPasteAbove
 } from './tree.js';
 
-import { map, filter } from 'lodash';
+import { map, filter, difference, last } from 'lodash';
 
 class TreeNode extends Component {
   getinitialState() {
@@ -382,6 +382,19 @@ class AgileTreeContainer extends Component {
     e.preventDefault();
   }
 
+  undo(e) {
+    if(this.state.logs.length == 1) return;
+
+    var logs = difference(this.state.logs, [last(this.state.logs)]);
+
+    this.setState({
+      logs,
+      tree: replay(logs)
+    });
+
+    e.preventDefault();
+  }
+
   componentDidMount() {
     key('c', this.edit.bind(this));
     key('i', this.edit.bind(this));
@@ -398,6 +411,7 @@ class AgileTreeContainer extends Component {
     key('shift+g', this.topOrBottom.bind(this));
     key('p', this.pasteAboveOrBelow.bind(this));
     key('shift+p', this.pasteAboveOrBelow.bind(this));
+    key('u', this.undo.bind(this));
   }
 
   render() {
@@ -431,6 +445,7 @@ class AgileTreeContainer extends Component {
             <li>`x` to cut entry</li>
             <li>`p` paste below</li>
             <li>`P` paste above</li>
+            <li>`u` undo</li>
           </ul>
         </div>
       </div>

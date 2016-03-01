@@ -573,6 +573,7 @@
 	    _this4.state = {
 	      logs: logs,
 	      tree: tree,
+	      redo: [],
 	      currentlyEditing: null,
 	      currentlyFocused: _this4.firstRootNode(tree)
 	    };
@@ -828,13 +829,32 @@
 	      }
 	
 	      logs = (0, _lodash.difference)(this.state.logs, [editToRemove]);
+	      var redo = this.state.redo;
+	      redo.push(editToRemove);
 	      tree = (0, _tree.replay)(logs);
 	      if (!newFocus) newFocus = this.firstRootNode((0, _tree.replay)(logs));
 	
 	      this.setState({
 	        logs: logs,
 	        tree: tree,
+	        redo: redo,
 	        currentlyFocused: newFocus
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
+	    key: 'redo',
+	    value: function redo(e) {
+	      var redo = this.state.redo;
+	      var toRedo = (0, _lodash.last)(redo);
+	      var logs = this.state.logs;
+	      logs.push(toRedo);
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs),
+	        redo: (0, _lodash.difference)(redo, [toRedo])
 	      });
 	
 	      e.preventDefault();
@@ -871,6 +891,7 @@
 	      key('shift+p', this.pasteAboveOrBelow.bind(this));
 	      key('u', this.undo.bind(this));
 	      key('m', this.toggleMark.bind(this));
+	      key('ctrl+r', this.redo.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -1008,6 +1029,22 @@
 	                'P'
 	              ),
 	              ' pastes above'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              React.createElement(
+	                'code',
+	                null,
+	                'u'
+	              ),
+	              ' to undo, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'ctrl+r'
+	              ),
+	              ' to redo'
 	            ),
 	            React.createElement(
 	              'li',

@@ -28,7 +28,7 @@ function newRow(text) {
 }
 
 function initialState() {
-  return { logs: [ ], clipBoard: [ ] };
+  return [ ];
 }
 
 describe('tree', function () {
@@ -37,9 +37,9 @@ describe('tree', function () {
     var row2 = newRow('foo');
     var row3 = newRow('bar');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
-    state = logAddBelow(state, row1.id, row3);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logAddBelow(logs, row1.id, row3);
 
     var expectedStructure = [
       { id: row1.id, text: row1.text, order: 1, parentId: null },
@@ -47,7 +47,7 @@ describe('tree', function () {
       { id: row2.id, text: row2.text, order: 3, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('add above', function() {
@@ -55,9 +55,9 @@ describe('tree', function () {
     var row2 = newRow('foo');
     var row3 = newRow('bar');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddAbove(state, row1.id, row2);
-    state = logAddAbove(state, row1.id, row3);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddAbove(logs, row1.id, row2);
+    logs = logAddAbove(logs, row1.id, row3);
 
     var expectedStructure = [
       { id: row2.id, text: row2.text, order: -1, parentId: null  },
@@ -65,31 +65,31 @@ describe('tree', function () {
       { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('update', function() {
     var row = newRow('root');
 
-    var state = logAdd(initialState(), row);
+    var logs = logAdd(initialState(), row);
 
-    state = logUpdate(state, row.id, 'say hello');
+    logs = logUpdate(logs, row.id, 'say hello');
 
     var expectedStructure = [
       { id: row.id, text: 'say hello', order: 1, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('previous', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
 
-    var tree = replay(state);
+    var tree = replay(logs);
 
     var result = getAbove(tree, row2.id).id;
 
@@ -100,10 +100,10 @@ describe('tree', function () {
     var row1 = newRow('root');
     var row2 = newRow('foo');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
 
-    var tree = replay(state);
+    var tree = replay(logs);
 
     var result = getBelow(tree, row1.id).id;
 
@@ -114,48 +114,48 @@ describe('tree', function () {
     var row1 = newRow('root');
     var row2 = newRow('foo');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
-    state = logCut(state, row2.id);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logCut(logs, row2.id);
 
     var expectedStructure = [
       { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('delete', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
-    state = logDelete(state, row2.id);
-    state = logPasteBelow(state, row1.id);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logDelete(logs, row2.id);
+    logs = logPasteBelow(logs, row1.id);
 
     var expectedStructure = [
       { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('paste below', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
-    state = logCut(state, row2.id);
-    state = logPasteBelow(state, row1.id);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logCut(logs, row2.id);
+    logs = logPasteBelow(logs, row1.id);
 
     var expectedStructure = [
       { id: row1.id, text: row1.text, order: 1, parentId: null },
       { id: row2.id, text: row2.text, order: 2, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('paste multiple', function() {
@@ -163,23 +163,23 @@ describe('tree', function () {
     var row2 = newRow('foo');
     var row3 = newRow('bar');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
-    state = logAddBelow(state, row2.id, row3);
-    state = logCut(state, row2.id);
-    state = logCut(state, row3.id);
-    state = logPasteBelow(state, row1.id);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+    logs = logCut(logs, row2.id);
+    logs = logCut(logs, row3.id);
+    logs = logPasteBelow(logs, row1.id);
 
     var expectedStructure = [
       { id: row1.id, text: row1.text, order: 1, parentId: null },
       { id: row3.id, text: row3.text, order: 2, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
 
-    state = logPasteBelow(state, row1.id);
+    logs = logPasteBelow(logs, row1.id);
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 
   specify('paste multiple above', function() {
@@ -187,22 +187,22 @@ describe('tree', function () {
     var row2 = newRow('2');
     var row3 = newRow('3');
 
-    var state = logAdd(initialState(), row1);
-    state = logAddBelow(state, row1.id, row2);
-    state = logAddBelow(state, row2.id, row3);
-    state = logCut(state, row2.id);
-    state = logCut(state, row3.id);
-    state = logPasteAbove(state, row1.id);
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+    logs = logCut(logs, row2.id);
+    logs = logCut(logs, row3.id);
+    logs = logPasteAbove(logs, row1.id);
 
     var expectedStructure = [
       { id: row3.id, text: row3.text, order: 0, parentId: null },
       { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
 
-    state = logPasteAbove(state, row1.id);
+    logs = logPasteAbove(logs, row1.id);
 
-    areSame(replay(state), expectedStructure);
+    areSame(replay(logs), expectedStructure);
   });
 });

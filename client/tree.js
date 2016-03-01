@@ -183,9 +183,9 @@ export function getFirstRightOf(table, rightOfId) {
   return first(getRightOf(table, rightOfId));
 }
 
-export function replay(state, startingTable = [ ]) {
+export function replay(logs, startingTable = [ ]) {
   var clipBoard = null;
-  each(state.logs, l => {
+  each(logs, l => {
     if(l.action == 'add') {
       startingTable = add(startingTable, l.row);
     } else if (l.action == 'addBelow') {
@@ -213,47 +213,38 @@ export function replay(state, startingTable = [ ]) {
   return startingTable;
 }
 
-export function logAdd(state, row) {
-  state.logs = concat(state.logs, { action: 'add', row });
-  return state;
+export function logAdd(logs, row) {
+  return concat(logs, { action: 'add', row });
 }
 
-export function logAddBelow(state, belowId, row) {
-  state.logs = concat(state.logs, { action: 'addBelow', belowId, row });
-  return state;
+export function logAddBelow(logs, belowId, row) {
+  return concat(logs, { action: 'addBelow', belowId, row });
 }
 
-export function logAddAbove(state, aboveId, row) {
-  state.logs = concat(state.logs, { action: 'addAbove', aboveId, row });
-  return state;
+export function logAddAbove(logs, aboveId, row) {
+  return concat(logs, { action: 'addAbove', aboveId, row });
 }
 
-export function logUpdate(state, id, text) {
-  state.logs = concat(state.logs, { action: 'update', id, text });
-  return state;
+export function logUpdate(logs, id, text) {
+  return concat(logs, { action: 'update', id, text });
 }
 
-export function logCut(state, id) {
-  state.logs = concat(state.logs, { action: 'cut', id });
-  return state;
+export function logCut(logs, id) {
+  return concat(logs, { action: 'cut', id });
 }
 
-export function logAddRight(state, rightOfId, row) {
-  state.logs = concat(state.logs, { action: 'addRight', rightOfId, row });
-  return state;
+export function logAddRight(logs, rightOfId, row) {
+  return concat(logs, { action: 'addRight', rightOfId, row });
 }
 
-export function logPasteBelow(state, belowId) {
-  state.logs = concat(state.logs, { action: 'pasteBelow', belowId });
-  return state;
+export function logPasteBelow(logs, belowId) {
+  return concat(logs, { action: 'pasteBelow', belowId });
 }
 
-export function logPasteAbove(state, belowId) {
-  state.logs = concat(state.logs, { action: 'pasteAbove', belowId });
-  return state;
+export function logPasteAbove(logs, belowId) {
+  return concat(logs, { action: 'pasteAbove', belowId });
 }
 
-export function logDelete(state, id) {
-  state.logs = concat(state.logs, { action: 'delete', id });
-  return state;
+export function logDelete(logs, id) {
+  return concat(logs, { action: 'delete', id });
 }

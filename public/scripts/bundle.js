@@ -20900,6 +20900,7 @@
 	  (0, _lodash.each)(workingSet.below, function (r) {
 	    return r.order -= 1;
 	  });
+	  workingSet.on.order -= 1;
 	
 	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order - 1, workingSet.on.parentId)));
 	}

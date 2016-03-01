@@ -5,15 +5,18 @@ import {
   logAdd,
   logAddBelow,
   logAddAbove,
+  logAddRight,
   logUpdate,
   logCut,
   logDelete,
   replay,
   getAbove,
+  getSiblingAbove,
   getBelow,
   logPasteBelow,
   logPasteAbove,
-  logToggleMark
+  logToggleMark,
+  getLastDeepest
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -83,32 +86,128 @@ describe('tree', function () {
     areSame(replay(logs), expectedStructure);
   });
 
-  specify('previous', function() {
-    var row1 = newRow('root');
-    var row2 = newRow('foo');
+  describe('previous', function() {
+    specify('just siblings', function() {
+      var row1 = newRow('root');
+      var row2 = newRow('foo');
 
-    var logs = logAdd(initialState(), row1);
-    logs = logAddBelow(logs, row1.id, row2);
+      var logs = logAdd(initialState(), row1);
+      logs = logAddBelow(logs, row1.id, row2);
 
-    var tree = replay(logs);
+      var tree = replay(logs);
 
-    var result = getAbove(tree, row2.id).id;
+      var result = getSiblingAbove(tree, row2.id).id;
 
-    assert.equal(result, row1.id);
+      assert.equal(result, row1.id);
+    });
+
+    specify('siblings and children', function() {
+      var item1 = newRow('item1');
+      var item1child1 = newRow('item1/child1');
+      var item1child2 = newRow('item1/child2');
+      var item2 = newRow('item2');
+      var item2child1 = newRow('item2/child1');
+      var item2child2 = newRow('item2/child2');
+
+      var logs = logAdd(initialState(), item1);
+      logs = logAddRight(logs, item1.id, item1child1);
+      logs = logAddRight(logs, item1.id, item1child2);
+      logs = logAddBelow(logs, item1.id, item2);
+      logs = logAddRight(logs, item2.id, item2child1);
+      logs = logAddRight(logs, item2.id, item2child2);
+
+      var tree = replay(logs);
+      assert.equal(getAbove(tree, item1.id), null);
+      assert.equal(getAbove(tree, item1child1.id).id, item1.id);
+      assert.equal(getAbove(tree, item1child2.id).id, item1child1.id);
+      assert.equal(getAbove(tree, item2.id).id, item1child2.id);
+      assert.equal(getAbove(tree, item2child1.id).id, item2.id);
+      assert.equal(getAbove(tree, item2child2.id).id, item2child1.id);
+    });
+
+    specify('nested children', function() {
+      var item1 = newRow('item1');
+      var item1child1 = newRow('item1/child1');
+      var item1child1child1 = newRow('item1/child1/child1');
+      var item2 = newRow('item2');
+
+      var logs = logAdd(initialState(), item1);
+      logs = logAddRight(logs, item1.id, item1child1);
+      logs = logAddRight(logs, item1child1.id, item1child1child1);
+      logs = logAddBelow(logs, item1.id, item2);
+
+      var tree = replay(logs);
+
+      assert.equal(getAbove(tree, item2.id).id, item1child1child1.id);
+    })
   });
 
-  specify('next', function() {
-    var row1 = newRow('root');
-    var row2 = newRow('foo');
+  describe('next', function() {
+    specify('just siblings', function() {
+      var row1 = newRow('root');
+      var row2 = newRow('foo');
 
-    var logs = logAdd(initialState(), row1);
-    logs = logAddBelow(logs, row1.id, row2);
+      var logs = logAdd(initialState(), row1);
+      logs = logAddBelow(logs, row1.id, row2);
 
-    var tree = replay(logs);
+      var tree = replay(logs);
 
-    var result = getBelow(tree, row1.id).id;
+      var result = getBelow(tree, row1.id).id;
 
-    assert.equal(result, row2.id);
+      assert.equal(result, row2.id);
+    });
+
+    specify('one siblings, one child', function() {
+      var row1 = newRow('root');
+      var row2 = newRow('root/child');
+
+      var logs = logAdd(initialState(), row1);
+      logs = logAddRight(logs, row1.id, row2);
+
+      var tree = replay(logs);
+      var result = getBelow(tree, row1.id).id;
+      assert.equal(result, row2.id);
+    });
+
+    specify('siblings and children', function() {
+      var item1 = newRow('item1');
+      var item1child1 = newRow('item1/child1');
+      var item1child2 = newRow('item1/child2');
+      var item2 = newRow('item2');
+      var item2child1 = newRow('item2/child1');
+      var item2child2 = newRow('item2/child2');
+
+      var logs = logAdd(initialState(), item1);
+      logs = logAddRight(logs, item1.id, item1child1);
+      logs = logAddRight(logs, item1.id, item1child2);
+      logs = logAddBelow(logs, item1.id, item2);
+      logs = logAddRight(logs, item2.id, item2child1);
+      logs = logAddRight(logs, item2.id, item2child2);
+
+      var tree = replay(logs);
+      assert.equal(getBelow(tree, item1.id).id, item1child1.id);
+      assert.equal(getBelow(tree, item1child1.id).id, item1child2.id);
+      assert.equal(getBelow(tree, item1child2.id).id, item2.id);
+      assert.equal(getBelow(tree, item2.id).id, item2child1.id);
+      assert.equal(getBelow(tree, item2child1.id).id, item2child2.id);
+      assert.equal(getBelow(tree, item2child2.id), null);
+    });
+
+    specify('nested children', function() {
+      var item1 = newRow('item1');
+      var item1child1 = newRow('item1/child1');
+      var item1child1child1 = newRow('item1/child2/child1');
+      var item2 = newRow('item2');
+
+      var logs = logAdd(initialState(), item1);
+      logs = logAddRight(logs, item1.id, item1child1);
+      logs = logAddRight(logs, item1child1.id, item1child1child1);
+      logs = logAddBelow(logs, item1.id, item2);
+
+      var tree = replay(logs);
+
+      assert.equal(getBelow(tree, item1child1child1.id).id, item2.id);
+    })
   });
 
   specify('cut', function() {

@@ -49,16 +49,67 @@ function rowsWithParentId(table, parentId) {
   return filter(table, r => r.parentId == parentId);
 }
 
-export function getAbove(table, id) {
+export function getSiblingAbove(table, id) {
+  if(!findRow(table, id)) return null;
+
   var row = findRow(table, id);
 
   return last(sort(rowsAbove(table, row.order, row.parentId)));
 }
 
-export function getBelow(table, id) {
+export function getLastDeepest(tree, id) {
+  var row = findRow(tree, id);
+
+  if(!row) return null;
+
+  var lastChild = last(rowsWithParentId(tree, id));
+
+  if(!lastChild) return row;
+
+  return getLastDeepest(tree, lastChild.id);
+}
+
+export function getAbove(tree, id) {
+  var row = findRow(tree, id);
+
+  if(!row) return null;
+
+  var siblingAbove = getSiblingAbove(tree, id);
+
+  if(siblingAbove) {
+    return getLastDeepest(tree, siblingAbove.id);
+  }
+
+  return findRow(tree, row.parentId);
+}
+
+export function getSiblingBelow(table, id) {
+  if(!findRow(table, id)) return null;
+
   var row = findRow(table, id);
 
   return first(sort(rowsBelow(table, row.order, row.parentId)));
+}
+
+function getHighestSiblingBelow(tree, id) {
+  var row = findRow(tree, id);
+
+  if(!row) return null;
+
+  if(row.parentId == null) return getSiblingBelow(tree, row.id);
+
+  var siblingBelowCurrent = getSiblingBelow(tree, row.id);
+
+  if(siblingBelowCurrent) return siblingBelowCurrent;
+
+  return getHighestSiblingBelow(tree, row.parentId);
+}
+
+export function getBelow(table, id) {
+  if(!findRow(table, id)) return null;
+
+  return first(rowsWithParentId(table, id)) ||
+    getHighestSiblingBelow(table, findRow(table, id).id);
 }
 
 export function getLeft(table, id) {

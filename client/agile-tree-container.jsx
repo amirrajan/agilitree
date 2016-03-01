@@ -390,6 +390,8 @@ class AgileTreeContainer extends Component {
       newFocus = this.state.currentlyFocused;
     } else if(editToRemove.action == 'delete') {
       newFocus = editToRemove.id;
+    } else if(editToRemove.action == 'toggleMark') {
+      newFocus = this.state.currentlyFocused;
     } else {
       newFocus = null;
     }

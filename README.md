@@ -4,12 +4,16 @@ Demo: https://agilitree.herokuapp.com/
 
 Usage:
 
-- disable vimium if you use that plugin (you won't need it)
-- `j` to move down
-- `k` to move up
-- `c` to change entry
-- `ESC` to save entry
-- `x` to cut entry
+- chrome plugins: disable vimium for this page
+- `k` to move up, `j` down, `l` to move right, `h` left<br />
+- `w` next sibling, `b` previous sibling
+- `0 (zero)` to move to the very top, `g` to move to top of current, `G` bottom of current
+- `c or i` to change item, `esc or ctrl+[` to save
+- `m` to mark/highlight item (toggle)
+- `o` to insert below, `O` for above
+- `x or d` to delete, `p` to paste below, `P` pastes above
+- `u` to undo, `ctrl+r` to redo
+- `console.log(localStorage['logs']);`
 
 To build and work with locally:
 

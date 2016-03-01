@@ -132,6 +132,8 @@ export function addAbove(table, aboveId, row) {
 }
 
 export function update(table, id, text) {
+  if(!findRow(table, id)) return table;
+
   findRow(table, id).text = text;
 
   return table;

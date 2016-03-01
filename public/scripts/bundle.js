@@ -470,6 +470,21 @@
 	      );
 	    }
 	  }, {
+	    key: 'renderMark',
+	    value: function renderMark() {
+	      if (!this.props.isMarked) return React.createElement(
+	        'span',
+	        null,
+	        this.props.text
+	      );
+	
+	      return React.createElement(
+	        'span',
+	        { style: { fontWeight: 'bold', fontSize: 'larger' } },
+	        this.props.text
+	      );
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      if (this.props.editing) return this.renderEditForm();
@@ -481,7 +496,7 @@
 	      return React.createElement(
 	        'li',
 	        { className: className },
-	        this.props.text,
+	        this.renderMark(),
 	        React.createElement(Tree, {
 	          tree: this.props.tree,
 	          save: this.props.save,
@@ -526,6 +541,7 @@
 	          return React.createElement(TreeNode, {
 	            key: v.id,
 	            text: v.text,
+	            isMarked: v.isMarked || false,
 	            tree: _this3.props.tree,
 	            currentlyEditing: _this3.props.currentlyEditing,
 	            currentlyFocused: _this3.props.currentlyFocused,
@@ -824,6 +840,18 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'toggleMark',
+	    value: function toggleMark(e) {
+	      var logs = (0, _tree.logToggleMark)(this.state.logs, this.state.currentlyFocused);
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs)
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      key('c', this.edit.bind(this));
@@ -842,6 +870,7 @@
 	      key('p', this.pasteAboveOrBelow.bind(this));
 	      key('shift+p', this.pasteAboveOrBelow.bind(this));
 	      key('u', this.undo.bind(this));
+	      key('m', this.toggleMark.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -931,6 +960,16 @@
 	                'esc or ctrl+['
 	              ),
 	              ' to save'
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              React.createElement(
+	                'code',
+	                null,
+	                'm'
+	              ),
+	              ' to mark/highlight item (toggle)'
 	            ),
 	            React.createElement(
 	              'li',
@@ -20753,6 +20792,7 @@
 	exports.addRight = addRight;
 	exports.getRightOf = getRightOf;
 	exports.getFirstRightOf = getFirstRightOf;
+	exports.toggleMark = toggleMark;
 	exports.replay = replay;
 	exports.logAdd = logAdd;
 	exports.logAddBelow = logAddBelow;
@@ -20763,6 +20803,7 @@
 	exports.logPasteBelow = logPasteBelow;
 	exports.logPasteAbove = logPasteAbove;
 	exports.logDelete = logDelete;
+	exports.logToggleMark = logToggleMark;
 	
 	var _lodash = __webpack_require__(162);
 	
@@ -20926,6 +20967,16 @@
 	  return (0, _lodash.first)(getRightOf(table, rightOfId));
 	}
 	
+	function toggleMark(table, id) {
+	  var row = findRow(table, id);
+	
+	  if (!row) return table;
+	
+	  row.isMarked = !row.isMarked;
+	
+	  return table;
+	}
+	
 	function replay(logs) {
 	  var startingTable = arguments.length <= 1 || arguments[1] === undefined ? [] : arguments[1];
 	
@@ -20953,6 +21004,8 @@
 	    } else if (l.action == 'delete') {
 	      clipBoard = findRow(startingTable, l.id);
 	      startingTable = del(startingTable, l.id);
+	    } else if (l.action == 'toggleMark') {
+	      startingTable = toggleMark(startingTable, l.id);
 	    }
 	  });
 	
@@ -20993,6 +21046,10 @@
 	
 	function logDelete(logs, id) {
 	  return (0, _lodash.concat)(logs, { action: 'delete', id: id });
+	}
+	
+	function logToggleMark(logs, id) {
+	  return (0, _lodash.concat)(logs, { action: 'toggleMark', id: id });
 	}
 
 /***/ },

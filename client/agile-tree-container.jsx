@@ -142,6 +142,7 @@ class AgileTreeContainer extends Component {
     this.state = {
       logs,
       tree,
+      redo: [ ],
       currentlyEditing: null,
       currentlyFocused: this.firstRootNode(tree)
     };
@@ -394,13 +395,31 @@ class AgileTreeContainer extends Component {
     }
 
     logs = difference(this.state.logs, [editToRemove]);
+    var redo = this.state.redo;
+    redo.push(editToRemove);
     tree = replay(logs);
     if (!newFocus) newFocus = this.firstRootNode(replay(logs));
 
     this.setState({
       logs,
       tree,
+      redo,
       currentlyFocused: newFocus
+    });
+
+    e.preventDefault();
+  }
+
+  redo(e) {
+    var redo = this.state.redo;
+    var toRedo = last(redo);
+    var logs = this.state.logs;
+    logs.push(toRedo);
+
+    this.setState({
+      logs,
+      tree: replay(logs),
+      redo: difference(redo, [toRedo])
     });
 
     e.preventDefault();
@@ -435,6 +454,7 @@ class AgileTreeContainer extends Component {
     key('shift+p', this.pasteAboveOrBelow.bind(this));
     key('u', this.undo.bind(this));
     key('m', this.toggleMark.bind(this));
+    key('ctrl+r', this.redo.bind(this));
   }
 
   render() {
@@ -464,6 +484,9 @@ class AgileTreeContainer extends Component {
             </li>
             <li>
               <code>x or d</code> to delete, <code>p</code> to paste below, <code>P</code> pastes above
+            </li>
+            <li>
+              <code>u</code> to undo, <code>ctrl+r</code> to redo
             </li>
             <li>
               <code>console.log(localStorage['logs']);</code>

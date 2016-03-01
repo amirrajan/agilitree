@@ -101,6 +101,8 @@ export function combine(workingSet) {
 }
 
 export function addBelow(table, belowId, row) {
+  if(!findRow(table, belowId)) return table;
+
   var workingSet = split(table, belowId);
   each(workingSet.below, r => r.order += 1);
 
@@ -115,6 +117,8 @@ export function addBelow(table, belowId, row) {
 }
 
 export function addAbove(table, aboveId, row) {
+  if(!findRow(table, aboveId)) return table;
+
   var workingSet = split(table, aboveId);
   each(workingSet.above, r => r.order -= 1);
 
@@ -139,6 +143,7 @@ export function del(table, id) {
 
 export function pasteBelow(table, belowId, row) {
   if(!row) return table;
+  if(!findRow(table, belowId)) return table;
 
   var workingSet = split(table, belowId);
   each(workingSet.below, r => r.order += 1);
@@ -153,10 +158,11 @@ export function pasteBelow(table, belowId, row) {
         workingSet.on.parentId)));
 }
 
-export function pasteAbove(table, belowId, row) {
+export function pasteAbove(table, aboveId, row) {
   if(!row) return table;
+  if(!findRow(table, aboveId)) return table;
 
-  var workingSet = split(table, belowId);
+  var workingSet = split(table, aboveId);
   each(workingSet.below, r => r.order -= 1);
 
   return sort(

@@ -20867,6 +20867,8 @@
 	}
 	
 	function update(table, id, text) {
+	  if (!findRow(table, id)) return table;
+	
 	  findRow(table, id).text = text;
 	
 	  return table;

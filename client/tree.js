@@ -192,6 +192,16 @@ export function getFirstRightOf(table, rightOfId) {
   return first(getRightOf(table, rightOfId));
 }
 
+export function toggleMark(table, id) {
+  var row = findRow(table, id);
+
+  if(!row) return table;
+
+  row.isMarked = !row.isMarked;
+
+  return table;
+}
+
 export function replay(logs, startingTable = [ ]) {
   var clipBoard = null;
   each(logs, l => {
@@ -217,6 +227,8 @@ export function replay(logs, startingTable = [ ]) {
     } else if (l.action == 'delete') {
       clipBoard = findRow(startingTable, l.id);
       startingTable = del(startingTable, l.id);
+    } else if (l.action == 'toggleMark') {
+      startingTable = toggleMark(startingTable, l.id);
     }
   });
 
@@ -257,4 +269,8 @@ export function logPasteAbove(logs, belowId) {
 
 export function logDelete(logs, id) {
   return concat(logs, { action: 'delete', id });
+}
+
+export function logToggleMark(logs, id) {
+  return concat(logs, { action: 'toggleMark', id });
 }

@@ -18,7 +18,8 @@ import {
   getRoot,
   top,
   bottom,
-  logPasteAbove
+  logPasteAbove,
+  logToggleMark
 } from './tree.js';
 
 import { map, filter, difference, last } from 'lodash';
@@ -72,6 +73,12 @@ class TreeNode extends Component {
     );
   }
 
+  renderMark() {
+    if(!this.props.isMarked) return <span>{this.props.text}</span>;
+
+    return <span style={{ fontWeight: 'bold', fontSize: 'larger' }}>{this.props.text}</span>;
+  }
+
   render() {
     if(this.props.editing) return this.renderEditForm();
 
@@ -80,7 +87,7 @@ class TreeNode extends Component {
     if(this.props.highlighted) className = 'currentlyFocused';
 
     return (
-      <li className={className}>{this.props.text}
+        <li className={className}>{this.renderMark()}
         <Tree
           tree={this.props.tree}
           save={this.props.save}
@@ -110,6 +117,7 @@ class Tree extends Component {
           (v) => <TreeNode
                    key={v.id}
                    text={v.text}
+                   isMarked={v.isMarked || false}
                    tree={this.props.tree}
                    currentlyEditing={this.props.currentlyEditing}
                    currentlyFocused={this.props.currentlyFocused}
@@ -398,6 +406,17 @@ class AgileTreeContainer extends Component {
     e.preventDefault();
   }
 
+  toggleMark(e) {
+    var logs = logToggleMark(this.state.logs, this.state.currentlyFocused);
+
+    this.setState({
+      logs,
+      tree: replay(logs),
+    });
+
+    e.preventDefault()
+  }
+
   componentDidMount() {
     key('c', this.edit.bind(this));
     key('i', this.edit.bind(this));
@@ -415,6 +434,7 @@ class AgileTreeContainer extends Component {
     key('p', this.pasteAboveOrBelow.bind(this));
     key('shift+p', this.pasteAboveOrBelow.bind(this));
     key('u', this.undo.bind(this));
+    key('m', this.toggleMark.bind(this));
   }
 
   render() {
@@ -435,6 +455,9 @@ class AgileTreeContainer extends Component {
             </li>
             <li>
               <code>c or i</code> to change item, <code>esc or ctrl+[</code> to save
+            </li>
+            <li>
+              <code>m</code> to mark/highlight item (toggle)
             </li>
             <li>
               <code>o</code> to insert below, <code>O</code> for above

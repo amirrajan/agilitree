@@ -12,7 +12,8 @@ import {
   getAbove,
   getBelow,
   logPasteBelow,
-  logPasteAbove
+  logPasteAbove,
+  logToggleMark
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -135,7 +136,8 @@ describe('tree', function () {
     logs = logPasteBelow(logs, row1.id);
 
     var expectedStructure = [
-      { id: row1.id, text: row1.text, order: 1, parentId: null }
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row2.id, text: row2.text, order: 2, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);
@@ -225,6 +227,27 @@ describe('tree', function () {
     areSame(replay(logs), expectedStructure);
 
     logs = logPasteAbove(logs, row1.id);
+
+    areSame(replay(logs), expectedStructure);
+  });
+
+  specify('mark node', function() {
+    var row1 = newRow('1');
+
+    var logs = logAdd(initialState(), row1);
+    logs = logToggleMark(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, isMarked: true, parentId: null }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+
+    logs = logToggleMark(logs, row1.id);
+
+    expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, isMarked: false, parentId: null }
+    ];
 
     areSame(replay(logs), expectedStructure);
   });

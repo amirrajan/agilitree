@@ -435,6 +435,8 @@
 	      } else if (e.keyCode == 27) {
 	        this.setState({ text: this.props.text });
 	        this.props.save(this.props.text);
+	      } else if (e.keyCode == 219 && e.ctrlKey) {
+	        this.props.save(this.state.text);
 	      }
 	    }
 	  }, {
@@ -919,7 +921,7 @@
 	              React.createElement(
 	                'code',
 	                null,
-	                'esc'
+	                'esc or ctrl+['
 	              ),
 	              ' to save'
 	            ),
@@ -945,9 +947,9 @@
 	              React.createElement(
 	                'code',
 	                null,
-	                'x'
+	                'x or d'
 	              ),
-	              ' to cut, ',
+	              ' to delete, ',
 	              React.createElement(
 	                'code',
 	                null,
@@ -960,22 +962,6 @@
 	                'P'
 	              ),
 	              ' pastes above'
-	            ),
-	            React.createElement(
-	              'li',
-	              null,
-	              React.createElement(
-	                'code',
-	                null,
-	                'd'
-	              ),
-	              ' to delete, ',
-	              React.createElement(
-	                'code',
-	                null,
-	                'u'
-	              ),
-	              ' to undo'
 	            ),
 	            React.createElement(
 	              'li',

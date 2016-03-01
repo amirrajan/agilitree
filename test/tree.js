@@ -158,6 +158,29 @@ describe('tree', function () {
     areSame(replay(logs), expectedStructure);
   });
 
+  specify('paste above', function() {
+    var row1 = newRow('item1');
+    var row2 = newRow('item2');
+    var row3 = newRow('item3');
+    var row4 = newRow('item4');
+
+    var logs = logAdd(initialState(), row1);
+    logs = logAdd(logs, row2);
+    logs = logAdd(logs, row3);
+    logs = logAdd(logs, row4);
+    logs = logCut(logs, row4.id);
+    logs = logPasteAbove(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row4.id, text: row4.text, order: -1, parentId: null },
+      { id: row1.id, text: row1.text, order: 0, parentId: null },
+      { id: row2.id, text: row2.text, order: 1, parentId: null },
+      { id: row3.id, text: row3.text, order: 2, parentId: null },
+    ];
+
+    areSame(replay(logs), expectedStructure);
+  });
+
   specify('paste multiple', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
@@ -195,8 +218,8 @@ describe('tree', function () {
     logs = logPasteAbove(logs, row1.id);
 
     var expectedStructure = [
-      { id: row3.id, text: row3.text, order: 0, parentId: null },
-      { id: row1.id, text: row1.text, order: 1, parentId: null }
+      { id: row3.id, text: row3.text, order: -1, parentId: null },
+      { id: row1.id, text: row1.text, order: 0, parentId: null }
     ];
 
     areSame(replay(logs), expectedStructure);

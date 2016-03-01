@@ -166,6 +166,7 @@ export function pasteAbove(table, aboveId, row) {
 
   var workingSet = split(table, aboveId);
   each(workingSet.below, r => r.order -= 1);
+  workingSet.on.order -= 1;
 
   return sort(
     concat(

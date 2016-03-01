@@ -699,6 +699,17 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'findClosest',
+	    value: function findClosest(tree, entry) {
+	      var prevOrNextOrLeft = (0, _tree.getAbove)(tree, entry);
+	
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getBelow)(tree, entry);
+	
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(tree, entry);
+	
+	      return prevOrNextOrLeft;
+	    }
+	  }, {
 	    key: 'cut',
 	    value: function cut(e) {
 	      if (this.state.tree.length == 1) {
@@ -706,42 +717,11 @@
 	        return;
 	      }
 	
-	      var prevOrNextOrLeft = (0, _tree.getAbove)(this.state.tree, this.state.currentlyFocused);
-	
-	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getBelow)(this.state.tree, this.state.currentlyFocused);
-	
-	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(this.state.tree, this.state.currentlyFocused);
+	      var prevOrNextOrLeft = this.findClosest(this.state.tree, this.state.currentlyFocused);
 	
 	      if (!prevOrNextOrLeft) return;
 	
 	      var logs = (0, _tree.logCut)(this.state.logs, this.state.currentlyFocused);
-	
-	      this.setState({
-	        logs: logs,
-	        tree: (0, _tree.replay)(logs),
-	        currentlyFocused: prevOrNextOrLeft.id,
-	        currentlyEditing: null
-	      });
-	
-	      e.preventDefault();
-	    }
-	  }, {
-	    key: 'delete',
-	    value: function _delete(e) {
-	      if (this.state.tree.length == 1) {
-	        e.preventDefault();
-	        return;
-	      }
-	
-	      var prevOrNextOrLeft = (0, _tree.getAbove)(this.state.tree, this.state.currentlyFocused);
-	
-	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getBelow)(this.state.tree, this.state.currentlyFocused);
-	
-	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(this.state.tree, this.state.currentlyFocused);
-	
-	      if (!prevOrNextOrLeft) return;
-	
-	      var logs = (0, _tree.logDelete)(this.state.logs, this.state.currentlyFocused);
 	
 	      this.setState({
 	        logs: logs,
@@ -807,14 +787,41 @@
 	      if (this.state.logs.length == 1) return;
 	
 	      var logs = this.state.logs;
-	      var logs = (0, _lodash.difference)(this.state.logs, [(0, _lodash.last)(this.state.logs)]);
+	      var tree = this.state.tree;
+	      var editToRemove = (0, _lodash.last)(this.state.logs);
+	      var newFocus = this.state.currentlyFocused;
+	
+	      if (editToRemove.action == 'addBelow') {
+	        newFocus = (0, _tree.getAbove)(tree, newFocus).id;
+	      } else if (editToRemove.action == 'addAbove') {
+	        newFocus = (0, _tree.getBelow)(tree, newFocus).id;
+	      } else if (editToRemove.action == 'update') {
+	        newFocus = this.state.currentlyFocused;
+	      } else if (editToRemove.action == 'cut') {
+	        newFocus = editToRemove.id;
+	      } else if (editToRemove.action == 'addRight') {
+	        newFocus = (0, _tree.getLeft)(tree, newFocus).id;
+	      } else if (editToRemove.action == 'pasteBelow') {
+	        newFocus = this.state.currentlyFocused;
+	      } else if (editToRemove.action == 'pasteAbove') {
+	        newFocus = this.state.currentlyFocused;
+	      } else if (editToRemove.action == 'delete') {
+	        newFocus = editToRemove.id;
+	      } else {
+	        newFocus = null;
+	      }
+	
+	      logs = (0, _lodash.difference)(this.state.logs, [editToRemove]);
+	      tree = (0, _tree.replay)(logs);
+	      if (!newFocus) newFocus = this.firstRootNode((0, _tree.replay)(logs));
 	
 	      this.setState({
 	        logs: logs,
-	        tree: (0, _tree.replay)(logs)
+	        tree: tree,
+	        currentlyFocused: newFocus
 	      });
 	
-	      this.root(e);
+	      e.preventDefault();
 	    }
 	  }, {
 	    key: 'componentDidMount',
@@ -20944,6 +20951,7 @@
 	      startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
 	      clipBoard = null;
 	    } else if (l.action == 'delete') {
+	      clipBoard = findRow(startingTable, l.id);
 	      startingTable = del(startingTable, l.id);
 	    }
 	  });

@@ -297,10 +297,10 @@ class AgileTreeContainer extends Component {
   }
 
   findClosest(tree, entry) {
-    var prevOrNextOrLeft = getAbove(
+    var prevOrNextOrLeft = getSiblingAbove(
       tree, entry);
 
-    prevOrNextOrLeft = prevOrNextOrLeft || getBelow(
+    prevOrNextOrLeft = prevOrNextOrLeft || getSiblingBelow(
       tree, entry);
 
     prevOrNextOrLeft = prevOrNextOrLeft || getLeft(
@@ -451,20 +451,22 @@ class AgileTreeContainer extends Component {
     } else if(toRedo.action == 'update') {
       newFocus = toRedo.id;
     } else if(toRedo.action == 'cut') {
-      newFocus = this.findClosest(this.state.tree, toRedo.id);
+      newFocus = this.findClosest(this.state.tree, toRedo.id).id;
     } else if(toRedo.action == 'addRight') {
-      newFocus = getLeft(tree, newFocus).id;
+      newFocus = toRedo.row.id;
     } else if(toRedo.action == 'pasteBelow') {
-      newFocus = this.state.currentlyFocused;
+      newFocus = toRedo.belowId;
     } else if(toRedo.action == 'pasteAbove') {
-      newFocus = this.state.currentlyFocused;
+      newFocus = toRedo.aboveId;
     } else if(toRedo.action == 'delete') {
-      newFocus = this.findClosest(this.state.tree, toRedo.id);
+      newFocus = this.findClosest(this.state.tree, toRedo.id).id;
     } else if(toRedo.action == 'toggleMark') {
-      newFocus = this.state.currentlyFocused;
+      newFocus = toRedo.id;
     } else {
       newFocus = null;
     }
+
+    if (!newFocus) newFocus = this.firstRootNode(replay(logs));
 
     this.setState({
       logs,

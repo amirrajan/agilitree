@@ -273,7 +273,7 @@ export function replay(logs, startingTable = [ ]) {
       startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
       clipBoard = null;
     } else if (l.action == 'pasteAbove'){
-      startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
+      startingTable = pasteAbove(startingTable, l.aboveId, clipBoard);
       clipBoard = null;
     } else if (l.action == 'delete') {
       clipBoard = findRow(startingTable, l.id);
@@ -314,8 +314,8 @@ export function logPasteBelow(logs, belowId) {
   return concat(logs, { action: 'pasteBelow', belowId });
 }
 
-export function logPasteAbove(logs, belowId) {
-  return concat(logs, { action: 'pasteAbove', belowId });
+export function logPasteAbove(logs, aboveId) {
+  return concat(logs, { action: 'pasteAbove', aboveId });
 }
 
 export function logDelete(logs, id) {

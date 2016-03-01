@@ -18,7 +18,6 @@ import {
   getRoot,
   top,
   bottom,
-  logDelete,
   logPasteAbove
 } from './tree.js';
 
@@ -272,59 +271,32 @@ class AgileTreeContainer extends Component {
     e.preventDefault();
   }
 
+  findClosest(tree, entry) {
+    var prevOrNextOrLeft = getAbove(
+      tree, entry);
+
+    prevOrNextOrLeft = prevOrNextOrLeft || getBelow(
+      tree, entry);
+
+    prevOrNextOrLeft = prevOrNextOrLeft || getLeft(
+      tree, entry);
+
+    return prevOrNextOrLeft;
+  }
+
   cut(e) {
     if(this.state.tree.length == 1) {
       e.preventDefault();
       return;
     }
 
-    var prevOrNextOrLeft = getAbove(
-      this.state.tree,
-      this.state.currentlyFocused);
-
-    prevOrNextOrLeft = prevOrNextOrLeft || getBelow(
-      this.state.tree,
-      this.state.currentlyFocused);
-
-    prevOrNextOrLeft = prevOrNextOrLeft || getLeft(
+    var prevOrNextOrLeft = this.findClosest(
       this.state.tree,
       this.state.currentlyFocused);
 
     if(!prevOrNextOrLeft) return;
 
     var logs = logCut(this.state.logs, this.state.currentlyFocused);
-
-    this.setState({
-      logs,
-      tree: replay(logs),
-      currentlyFocused: prevOrNextOrLeft.id,
-      currentlyEditing: null
-    });
-
-    e.preventDefault();
-  }
-
-  delete(e) {
-    if(this.state.tree.length == 1) {
-      e.preventDefault();
-      return;
-    }
-
-    var prevOrNextOrLeft = getAbove(
-      this.state.tree,
-      this.state.currentlyFocused);
-
-    prevOrNextOrLeft = prevOrNextOrLeft || getBelow(
-      this.state.tree,
-      this.state.currentlyFocused);
-
-    prevOrNextOrLeft = prevOrNextOrLeft || getLeft(
-      this.state.tree,
-      this.state.currentlyFocused);
-
-    if(!prevOrNextOrLeft) return;
-
-    var logs = logDelete(this.state.logs, this.state.currentlyFocused);
 
     this.setState({
       logs,
@@ -389,14 +361,41 @@ class AgileTreeContainer extends Component {
     if(this.state.logs.length == 1) return;
 
     var logs = this.state.logs;
-    var logs = difference(this.state.logs, [last(this.state.logs)]);
+    var tree = this.state.tree;
+    var editToRemove = last(this.state.logs);
+    var newFocus = this.state.currentlyFocused;
+
+    if(editToRemove.action == 'addBelow') {
+      newFocus = getAbove(tree, newFocus).id;
+    } else if(editToRemove.action == 'addAbove') {
+      newFocus = getBelow(tree, newFocus).id;
+    } else if(editToRemove.action == 'update') {
+      newFocus = this.state.currentlyFocused;
+    } else if(editToRemove.action == 'cut') {
+      newFocus = editToRemove.id;
+    } else if(editToRemove.action == 'addRight') {
+      newFocus = getLeft(tree, newFocus).id;
+    } else if(editToRemove.action == 'pasteBelow') {
+      newFocus = this.state.currentlyFocused;
+    } else if(editToRemove.action == 'pasteAbove') {
+      newFocus = this.state.currentlyFocused;
+    } else if(editToRemove.action == 'delete') {
+      newFocus = editToRemove.id;
+    } else {
+      newFocus = null;
+    }
+
+    logs = difference(this.state.logs, [editToRemove]);
+    tree = replay(logs);
+    if (!newFocus) newFocus = this.firstRootNode(replay(logs));
 
     this.setState({
       logs,
-      tree: replay(logs)
+      tree,
+      currentlyFocused: newFocus
     });
 
-    this.root(e);
+    e.preventDefault();
   }
 
   componentDidMount() {

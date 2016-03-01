@@ -215,6 +215,7 @@ export function replay(logs, startingTable = [ ]) {
       startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
       clipBoard = null;
     } else if (l.action == 'delete') {
+      clipBoard = findRow(startingTable, l.id);
       startingTable = del(startingTable, l.id);
     }
   });

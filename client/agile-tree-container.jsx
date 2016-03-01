@@ -38,11 +38,14 @@ class TreeNode extends Component {
   saveOrNothing(e) {
     if(e.keyCode == 27 && this.props.text != this.state.text) {
       this.props.save(this.state.text);
+    } else if(e.keyCode == 219 && e.ctrlKey && this.props.text != this.state.text) {
+      this.props.save(this.state.text);
     } else if(e.keyCode == 27) {
       this.setState({ text: this.props.text });
-      this.props.save(this.props.text);
+      this.props.cancelEdit();
     } else if(e.keyCode == 219 && e.ctrlKey) {
-      this.props.save(this.state.text);
+      this.setState({ text: this.props.text });
+      this.props.cancelEdit();
     }
   }
 
@@ -67,6 +70,7 @@ class TreeNode extends Component {
         <Tree
           tree={this.props.tree}
           save={this.props.save}
+          cancelEdit={this.props.cancelEdit}
           currentlyFocused={this.props.currentlyFocused}
           currentlyEditing={this.props.currentlyEditing}
           parentId={this.props.parentId}
@@ -93,6 +97,7 @@ class TreeNode extends Component {
         <Tree
           tree={this.props.tree}
           save={this.props.save}
+          cancelEdit={this.props.cancelEdit}
           currentlyFocused={this.props.currentlyFocused}
           currentlyEditing={this.props.currentlyEditing}
           parentId={this.props.parentId}
@@ -126,6 +131,7 @@ class Tree extends Component {
                    editing={v.id == this.props.currentlyEditing}
                    highlighted={v.id == this.props.currentlyFocused}
                    save={this.props.save}
+                   cancelEdit={this.props.cancelEdit}
                    parentId={v.id}
                  />)}
       </ul>
@@ -211,8 +217,6 @@ class AgileTreeContainer extends Component {
   addChildOrRight(e) {
     this.addOrSelect(e, getFirstRightOf, logAddRight);
   }
-
-
 
   root(e) {
     this.setState({
@@ -343,6 +347,12 @@ class AgileTreeContainer extends Component {
     });
   }
 
+  cancelEdit() {
+    this.setState({
+      currentlyEditing: null
+    });
+  }
+
   topOrBottom(e) {
     var tree = this.state.tree;
     var currentlyFocused = this.state.currentlyFocused;
@@ -387,7 +397,7 @@ class AgileTreeContainer extends Component {
     var newFocus = this.state.currentlyFocused;
 
     if(editToRemove.action == 'addBelow') {
-      newFocus = getAbove(tree, newFocus).id;
+      newFocus = (getAbove(tree, newFocus) || { }).id;
     } else if(editToRemove.action == 'addAbove') {
       newFocus = getBelow(tree, newFocus).id;
     } else if(editToRemove.action == 'update') {
@@ -427,13 +437,40 @@ class AgileTreeContainer extends Component {
   redo(e) {
     var redo = this.state.redo;
     var toRedo = last(redo);
+    if(!toRedo) return;
+
     var logs = this.state.logs;
     logs.push(toRedo);
+
+    var newFocus = this.state.currentlyFocused;
+
+    if(toRedo.action == 'addBelow') {
+      newFocus = toRedo.row.id;
+    } else if(toRedo.action == 'addAbove') {
+      newFocus = toRedo.row.id;
+    } else if(toRedo.action == 'update') {
+      newFocus = toRedo.id;
+    } else if(toRedo.action == 'cut') {
+      newFocus = this.findClosest(this.state.tree, toRedo.id);
+    } else if(toRedo.action == 'addRight') {
+      newFocus = getLeft(tree, newFocus).id;
+    } else if(toRedo.action == 'pasteBelow') {
+      newFocus = this.state.currentlyFocused;
+    } else if(toRedo.action == 'pasteAbove') {
+      newFocus = this.state.currentlyFocused;
+    } else if(toRedo.action == 'delete') {
+      newFocus = this.findClosest(this.state.tree, toRedo.id);
+    } else if(toRedo.action == 'toggleMark') {
+      newFocus = this.state.currentlyFocused;
+    } else {
+      newFocus = null;
+    }
 
     this.setState({
       logs,
       tree: replay(logs),
-      redo: difference(redo, [toRedo])
+      redo: difference(redo, [toRedo]),
+      currentlyFocused: newFocus
     });
 
     e.preventDefault();
@@ -520,6 +557,7 @@ class AgileTreeContainer extends Component {
           uia='tree'
           tree={this.state.tree}
           save={this.save.bind(this)}
+          cancelEdit={this.cancelEdit.bind(this)}
           currentlyFocused={this.state.currentlyFocused}
           currentlyEditing={this.state.currentlyEditing}
         />

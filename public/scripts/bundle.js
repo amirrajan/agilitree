@@ -20845,6 +20845,8 @@
 	}
 	
 	function addBelow(table, belowId, row) {
+	  if (!findRow(table, belowId)) return table;
+	
 	  var workingSet = split(table, belowId);
 	  (0, _lodash.each)(workingSet.below, function (r) {
 	    return r.order += 1;
@@ -20854,6 +20856,8 @@
 	}
 	
 	function addAbove(table, aboveId, row) {
+	  if (!findRow(table, aboveId)) return table;
+	
 	  var workingSet = split(table, aboveId);
 	  (0, _lodash.each)(workingSet.above, function (r) {
 	    return r.order -= 1;
@@ -20876,6 +20880,7 @@
 	
 	function pasteBelow(table, belowId, row) {
 	  if (!row) return table;
+	  if (!findRow(table, belowId)) return table;
 	
 	  var workingSet = split(table, belowId);
 	  (0, _lodash.each)(workingSet.below, function (r) {
@@ -20885,10 +20890,11 @@
 	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order + 1, workingSet.on.parentId)));
 	}
 	
-	function pasteAbove(table, belowId, row) {
+	function pasteAbove(table, aboveId, row) {
 	  if (!row) return table;
+	  if (!findRow(table, aboveId)) return table;
 	
-	  var workingSet = split(table, belowId);
+	  var workingSet = split(table, aboveId);
 	  (0, _lodash.each)(workingSet.below, function (r) {
 	    return r.order -= 1;
 	  });

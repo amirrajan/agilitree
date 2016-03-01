@@ -11,8 +11,10 @@ import {
   logPasteBelow,
   replay,
   getAbove,
+  getSiblingAbove,
   findRow,
   getBelow,
+  getSiblingBelow,
   getLeft,
   getFirstRightOf,
   getRoot,
@@ -198,9 +200,19 @@ class AgileTreeContainer extends Component {
     this.addOrSelect(e, getAbove, logAddAbove);
   }
 
+  addSiblingOrMoveBelowSibling(e) {
+    this.addOrSelect(e, getSiblingBelow, logAddBelow);
+  }
+
+  addSiblingOrMoveAboveSibling(e) {
+    this.addOrSelect(e, getSiblingAbove, logAddAbove);
+  }
+
   addChildOrRight(e) {
     this.addOrSelect(e, getFirstRightOf, logAddRight);
   }
+
+
 
   root(e) {
     this.setState({
@@ -457,6 +469,8 @@ class AgileTreeContainer extends Component {
     key('u', this.undo.bind(this));
     key('m', this.toggleMark.bind(this));
     key('ctrl+r', this.redo.bind(this));
+    key('w', this.addSiblingOrMoveBelowSibling.bind(this));
+    key('b', this.addSiblingOrMoveAboveSibling.bind(this));
   }
 
   render() {
@@ -471,6 +485,9 @@ class AgileTreeContainer extends Component {
             </li>
             <li>
               <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left<br />
+            </li>
+            <li>
+              <code>w</code> next sibling, <code>b</code> previous sibling
             </li>
             <li>
               <code>0 (zero)</code> to move to the very top, <code>g</code> to move to top of current, <code>G</code> bottom of current

@@ -137,44 +137,36 @@ export function del(table, id) {
   return filter(table, t => t.id != id);
 }
 
-export function pasteBelow(table, belowId, rows) {
-  var tempTable = table;
+export function pasteBelow(table, belowId, row) {
+  if(!row) return table;
 
-  each(reverse(rows), row => {
-    var workingSet = split(tempTable, belowId);
-    each(workingSet.below, r => r.order += 1);
+  var workingSet = split(table, belowId);
+  each(workingSet.below, r => r.order += 1);
 
-    tempTable = sort(
-      concat(
-        combine(workingSet),
-        newRow(
-          row.id,
-          row.text,
-          workingSet.on.order + 1,
-          workingSet.on.parentId)));
-  });
-
-  return tempTable;
+  return sort(
+    concat(
+      combine(workingSet),
+      newRow(
+        row.id,
+        row.text,
+        workingSet.on.order + 1,
+        workingSet.on.parentId)));
 }
 
-export function pasteAbove(table, belowId, rows) {
-  var tempTable = table;
+export function pasteAbove(table, belowId, row) {
+  if(!row) return table;
 
-  each(reverse(rows), (row, index) => {
-    var workingSet = split(tempTable, belowId);
-    each(workingSet.below, r => r.order -= 1);
+  var workingSet = split(table, belowId);
+  each(workingSet.below, r => r.order -= 1);
 
-    tempTable = sort(
-      concat(
-        combine(workingSet),
-        newRow(
-          row.id,
-          row.text,
-          workingSet.on.order - (index + 1),
-          workingSet.on.parentId)));
-  });
-
-  return tempTable;
+  return sort(
+    concat(
+      combine(workingSet),
+      newRow(
+        row.id,
+        row.text,
+        workingSet.on.order - 1,
+        workingSet.on.parentId)));
 }
 
 export function addRight(table, rightOfId, row) {
@@ -192,7 +184,7 @@ export function getFirstRightOf(table, rightOfId) {
 }
 
 export function replay(state, startingTable = [ ]) {
-  var clipBoard = [];
+  var clipBoard = null;
   each(state.logs, l => {
     if(l.action == 'add') {
       startingTable = add(startingTable, l.row);
@@ -203,16 +195,16 @@ export function replay(state, startingTable = [ ]) {
     } else if (l.action == 'update') {
       startingTable = update(startingTable, l.id, l.text);
     } else if (l.action == 'cut') {
-      clipBoard.push(findRow(startingTable, l.id));
+      clipBoard = findRow(startingTable, l.id);
       startingTable = del(startingTable, l.id);
     } else if (l.action == 'addRight') {
       startingTable = addRight(startingTable, l.rightOfId, l.row);
     } else if (l.action == 'pasteBelow') {
       startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
-      clipBoard = [];
+      clipBoard = null;
     } else if (l.action == 'pasteAbove'){
       startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
-      clipBoard = [];
+      clipBoard = null;
     } else if (l.action == 'delete') {
       startingTable = del(startingTable, l.id);
     }

@@ -412,7 +412,7 @@ class AgileTreeContainer extends Component {
     key('l', this.addChildOrRight.bind(this));
     key('h', this.left.bind(this));
     key('x', this.cut.bind(this));
-    key('d', this.delete.bind(this));
+    key('d', this.cut.bind(this));
     key('o', this.addSiblingAboveBelow.bind(this));
     key('shift+o', this.addSiblingAboveBelow.bind(this));
     key('0', this.root.bind(this));

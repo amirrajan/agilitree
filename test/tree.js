@@ -172,9 +172,12 @@ describe('tree', function () {
 
     var expectedStructure = [
       { id: row1.id, text: row1.text, order: 1, parentId: null },
-      { id: row2.id, text: row2.text, order: 2, parentId: null },
-      { id: row3.id, text: row3.text, order: 3, parentId: null }
+      { id: row3.id, text: row3.text, order: 2, parentId: null }
     ];
+
+    areSame(replay(state), expectedStructure);
+
+    state = logPasteBelow(state, row1.id);
 
     areSame(replay(state), expectedStructure);
   });
@@ -192,10 +195,13 @@ describe('tree', function () {
     state = logPasteAbove(state, row1.id);
 
     var expectedStructure = [
-      { id: row2.id, text: row2.text, order: -1, parentId: null },
       { id: row3.id, text: row3.text, order: 0, parentId: null },
       { id: row1.id, text: row1.text, order: 1, parentId: null }
     ];
+
+    areSame(replay(state), expectedStructure);
+
+    state = logPasteAbove(state, row1.id);
 
     areSame(replay(state), expectedStructure);
   });

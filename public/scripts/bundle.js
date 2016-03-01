@@ -432,11 +432,14 @@
 	    value: function saveOrNothing(e) {
 	      if (e.keyCode == 27 && this.props.text != this.state.text) {
 	        this.props.save(this.state.text);
+	      } else if (e.keyCode == 219 && e.ctrlKey && this.props.text != this.state.text) {
+	        this.props.save(this.state.text);
 	      } else if (e.keyCode == 27) {
 	        this.setState({ text: this.props.text });
-	        this.props.save(this.props.text);
+	        this.props.cancelEdit();
 	      } else if (e.keyCode == 219 && e.ctrlKey) {
-	        this.props.save(this.state.text);
+	        this.setState({ text: this.props.text });
+	        this.props.cancelEdit();
 	      }
 	    }
 	  }, {
@@ -463,6 +466,7 @@
 	        React.createElement(Tree, {
 	          tree: this.props.tree,
 	          save: this.props.save,
+	          cancelEdit: this.props.cancelEdit,
 	          currentlyFocused: this.props.currentlyFocused,
 	          currentlyEditing: this.props.currentlyEditing,
 	          parentId: this.props.parentId
@@ -500,6 +504,7 @@
 	        React.createElement(Tree, {
 	          tree: this.props.tree,
 	          save: this.props.save,
+	          cancelEdit: this.props.cancelEdit,
 	          currentlyFocused: this.props.currentlyFocused,
 	          currentlyEditing: this.props.currentlyEditing,
 	          parentId: this.props.parentId
@@ -548,6 +553,7 @@
 	            editing: v.id == _this3.props.currentlyEditing,
 	            highlighted: v.id == _this3.props.currentlyFocused,
 	            save: _this3.props.save,
+	            cancelEdit: _this3.props.cancelEdit,
 	            parentId: v.id
 	          });
 	        })
@@ -638,6 +644,16 @@
 	      this.addOrSelect(e, _tree.getAbove, _tree.logAddAbove);
 	    }
 	  }, {
+	    key: 'addSiblingOrMoveBelowSibling',
+	    value: function addSiblingOrMoveBelowSibling(e) {
+	      this.addOrSelect(e, _tree.getSiblingBelow, _tree.logAddBelow);
+	    }
+	  }, {
+	    key: 'addSiblingOrMoveAboveSibling',
+	    value: function addSiblingOrMoveAboveSibling(e) {
+	      this.addOrSelect(e, _tree.getSiblingAbove, _tree.logAddAbove);
+	    }
+	  }, {
 	    key: 'addChildOrRight',
 	    value: function addChildOrRight(e) {
 	      this.addOrSelect(e, _tree.getFirstRightOf, _tree.logAddRight);
@@ -718,9 +734,9 @@
 	  }, {
 	    key: 'findClosest',
 	    value: function findClosest(tree, entry) {
-	      var prevOrNextOrLeft = (0, _tree.getAbove)(tree, entry);
+	      var prevOrNextOrLeft = (0, _tree.getSiblingAbove)(tree, entry);
 	
-	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getBelow)(tree, entry);
+	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getSiblingBelow)(tree, entry);
 	
 	      prevOrNextOrLeft = prevOrNextOrLeft || (0, _tree.getLeft)(tree, entry);
 	
@@ -758,6 +774,13 @@
 	        logs: logs,
 	        tree: (0, _tree.replay)(logs),
 	        currentlyFocused: this.state.currentlyEditing,
+	        currentlyEditing: null
+	      });
+	    }
+	  }, {
+	    key: 'cancelEdit',
+	    value: function cancelEdit() {
+	      this.setState({
 	        currentlyEditing: null
 	      });
 	    }
@@ -809,7 +832,7 @@
 	      var newFocus = this.state.currentlyFocused;
 	
 	      if (editToRemove.action == 'addBelow') {
-	        newFocus = (0, _tree.getAbove)(tree, newFocus).id;
+	        newFocus = ((0, _tree.getAbove)(tree, newFocus) || {}).id;
 	      } else if (editToRemove.action == 'addAbove') {
 	        newFocus = (0, _tree.getBelow)(tree, newFocus).id;
 	      } else if (editToRemove.action == 'update') {
@@ -850,13 +873,42 @@
 	    value: function redo(e) {
 	      var redo = this.state.redo;
 	      var toRedo = (0, _lodash.last)(redo);
+	      if (!toRedo) return;
+	
 	      var logs = this.state.logs;
 	      logs.push(toRedo);
+	
+	      var newFocus = this.state.currentlyFocused;
+	
+	      if (toRedo.action == 'addBelow') {
+	        newFocus = toRedo.row.id;
+	      } else if (toRedo.action == 'addAbove') {
+	        newFocus = toRedo.row.id;
+	      } else if (toRedo.action == 'update') {
+	        newFocus = toRedo.id;
+	      } else if (toRedo.action == 'cut') {
+	        newFocus = this.findClosest(this.state.tree, toRedo.id).id;
+	      } else if (toRedo.action == 'addRight') {
+	        newFocus = toRedo.row.id;
+	      } else if (toRedo.action == 'pasteBelow') {
+	        newFocus = toRedo.belowId;
+	      } else if (toRedo.action == 'pasteAbove') {
+	        newFocus = toRedo.aboveId;
+	      } else if (toRedo.action == 'delete') {
+	        newFocus = this.findClosest(this.state.tree, toRedo.id).id;
+	      } else if (toRedo.action == 'toggleMark') {
+	        newFocus = toRedo.id;
+	      } else {
+	        newFocus = null;
+	      }
+	
+	      if (!newFocus) newFocus = this.firstRootNode((0, _tree.replay)(logs));
 	
 	      this.setState({
 	        logs: logs,
 	        tree: (0, _tree.replay)(logs),
-	        redo: (0, _lodash.difference)(redo, [toRedo])
+	        redo: (0, _lodash.difference)(redo, [toRedo]),
+	        currentlyFocused: newFocus
 	      });
 	
 	      e.preventDefault();
@@ -894,6 +946,8 @@
 	      key('u', this.undo.bind(this));
 	      key('m', this.toggleMark.bind(this));
 	      key('ctrl+r', this.redo.bind(this));
+	      key('w', this.addSiblingOrMoveBelowSibling.bind(this));
+	      key('b', this.addSiblingOrMoveAboveSibling.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -945,6 +999,22 @@
 	              ),
 	              ' left',
 	              React.createElement('br', null)
+	            ),
+	            React.createElement(
+	              'li',
+	              null,
+	              React.createElement(
+	                'code',
+	                null,
+	                'w'
+	              ),
+	              ' next sibling, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'b'
+	              ),
+	              ' previous sibling'
 	            ),
 	            React.createElement(
 	              'li',
@@ -1073,6 +1143,7 @@
 	          uia: 'tree',
 	          tree: this.state.tree,
 	          save: this.save.bind(this),
+	          cancelEdit: this.cancelEdit.bind(this),
 	          currentlyFocused: this.state.currentlyFocused,
 	          currentlyEditing: this.state.currentlyEditing
 	        })
@@ -20814,7 +20885,10 @@
 	});
 	exports.add = add;
 	exports.findRow = findRow;
+	exports.getSiblingAbove = getSiblingAbove;
+	exports.getLastDeepest = getLastDeepest;
 	exports.getAbove = getAbove;
+	exports.getSiblingBelow = getSiblingBelow;
 	exports.getBelow = getBelow;
 	exports.getLeft = getLeft;
 	exports.getRoot = getRoot;
@@ -20884,16 +20958,66 @@
 	  });
 	}
 	
-	function getAbove(table, id) {
+	function getSiblingAbove(table, id) {
+	  if (!findRow(table, id)) return null;
+	
 	  var row = findRow(table, id);
 	
 	  return (0, _lodash.last)(sort(rowsAbove(table, row.order, row.parentId)));
 	}
 	
-	function getBelow(table, id) {
+	function getLastDeepest(tree, id) {
+	  var row = findRow(tree, id);
+	
+	  if (!row) return null;
+	
+	  var lastChild = (0, _lodash.last)(rowsWithParentId(tree, id));
+	
+	  if (!lastChild) return row;
+	
+	  return getLastDeepest(tree, lastChild.id);
+	}
+	
+	function getAbove(tree, id) {
+	  var row = findRow(tree, id);
+	
+	  if (!row) return null;
+	
+	  var siblingAbove = getSiblingAbove(tree, id);
+	
+	  if (siblingAbove) {
+	    return getLastDeepest(tree, siblingAbove.id);
+	  }
+	
+	  return findRow(tree, row.parentId);
+	}
+	
+	function getSiblingBelow(table, id) {
+	  if (!findRow(table, id)) return null;
+	
 	  var row = findRow(table, id);
 	
 	  return (0, _lodash.first)(sort(rowsBelow(table, row.order, row.parentId)));
+	}
+	
+	function getHighestSiblingBelow(tree, id) {
+	  var row = findRow(tree, id);
+	
+	  if (!row) return null;
+	
+	  if (row.parentId == null) return getSiblingBelow(tree, row.id);
+	
+	  var siblingBelowCurrent = getSiblingBelow(tree, row.id);
+	
+	  if (siblingBelowCurrent) return siblingBelowCurrent;
+	
+	  return getHighestSiblingBelow(tree, row.parentId);
+	}
+	
+	function getBelow(table, id) {
+	  if (!findRow(table, id)) return null;
+	
+	  return (0, _lodash.first)(rowsWithParentId(table, id)) || getHighestSiblingBelow(table, findRow(table, id).id);
 	}
 	
 	function getLeft(table, id) {
@@ -21038,7 +21162,7 @@
 	      startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
 	      clipBoard = null;
 	    } else if (l.action == 'pasteAbove') {
-	      startingTable = pasteAbove(startingTable, l.belowId, clipBoard);
+	      startingTable = pasteAbove(startingTable, l.aboveId, clipBoard);
 	      clipBoard = null;
 	    } else if (l.action == 'delete') {
 	      clipBoard = findRow(startingTable, l.id);
@@ -21079,8 +21203,8 @@
 	  return (0, _lodash.concat)(logs, { action: 'pasteBelow', belowId: belowId });
 	}
 	
-	function logPasteAbove(logs, belowId) {
-	  return (0, _lodash.concat)(logs, { action: 'pasteAbove', belowId: belowId });
+	function logPasteAbove(logs, aboveId) {
+	  return (0, _lodash.concat)(logs, { action: 'pasteAbove', aboveId: aboveId });
 	}
 	
 	function logDelete(logs, id) {

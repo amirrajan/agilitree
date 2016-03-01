@@ -39,6 +39,8 @@ class TreeNode extends Component {
     } else if(e.keyCode == 27) {
       this.setState({ text: this.props.text });
       this.props.save(this.props.text);
+    } else if(e.keyCode == 219 && e.ctrlKey) {
+      this.props.save(this.state.text);
     }
   }
 
@@ -433,16 +435,13 @@ class AgileTreeContainer extends Component {
               <code>0 (zero)</code> to move to the very top, <code>g</code> to move to top of current, <code>G</code> bottom of current
             </li>
             <li>
-              <code>c or i</code> to change item, <code>esc</code> to save
+              <code>c or i</code> to change item, <code>esc or ctrl+[</code> to save
             </li>
             <li>
               <code>o</code> to insert below, <code>O</code> for above
             </li>
             <li>
-              <code>x</code> to cut, <code>p</code> to paste below, <code>P</code> pastes above
-            </li>
-            <li>
-              <code>d</code> to delete, <code>u</code> to undo
+              <code>x or d</code> to delete, <code>p</code> to paste below, <code>P</code> pastes above
             </li>
             <li>
               <code>console.log(localStorage['logs']);</code>

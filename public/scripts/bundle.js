@@ -448,6 +448,11 @@
 	      this.setState({ text: e.target.value });
 	    }
 	  }, {
+	    key: 'setFocus',
+	    value: function setFocus() {
+	      this.props.setFocus(this.props.id);
+	    }
+	  }, {
 	    key: 'renderEditForm',
 	    value: function renderEditForm() {
 	      return React.createElement(
@@ -467,6 +472,7 @@
 	          tree: this.props.tree,
 	          save: this.props.save,
 	          cancelEdit: this.props.cancelEdit,
+	          setFocus: this.props.setFocus,
 	          currentlyFocused: this.props.currentlyFocused,
 	          currentlyEditing: this.props.currentlyEditing,
 	          parentId: this.props.parentId
@@ -474,8 +480,8 @@
 	      );
 	    }
 	  }, {
-	    key: 'renderMark',
-	    value: function renderMark() {
+	    key: 'renderText',
+	    value: function renderText() {
 	      if (!this.props.isMarked) return React.createElement(
 	        'span',
 	        null,
@@ -499,12 +505,13 @@
 	
 	      return React.createElement(
 	        'li',
-	        { className: className },
-	        this.renderMark(),
+	        { onClick: this.setFocus.bind(this), className: className },
+	        this.renderText(),
 	        React.createElement(Tree, {
 	          tree: this.props.tree,
 	          save: this.props.save,
 	          cancelEdit: this.props.cancelEdit,
+	          setFocus: this.props.setFocus,
 	          currentlyFocused: this.props.currentlyFocused,
 	          currentlyEditing: this.props.currentlyEditing,
 	          parentId: this.props.parentId
@@ -545,6 +552,7 @@
 	        (0, _lodash.map)(parents, function (v) {
 	          return React.createElement(TreeNode, {
 	            key: v.id,
+	            id: v.id,
 	            text: v.text,
 	            isMarked: v.isMarked || false,
 	            tree: _this3.props.tree,
@@ -554,6 +562,7 @@
 	            highlighted: v.id == _this3.props.currentlyFocused,
 	            save: _this3.props.save,
 	            cancelEdit: _this3.props.cancelEdit,
+	            setFocus: _this3.props.setFocus,
 	            parentId: v.id
 	          });
 	        })
@@ -782,6 +791,14 @@
 	    value: function cancelEdit() {
 	      this.setState({
 	        currentlyEditing: null
+	      });
+	    }
+	  }, {
+	    key: 'setFocus',
+	    value: function setFocus(id) {
+	      this.setState({
+	        currentlyEditing: null,
+	        currentlyFocused: id
 	      });
 	    }
 	  }, {
@@ -1014,7 +1031,7 @@
 	                null,
 	                'b'
 	              ),
-	              ' previous sibling'
+	              ' previous sibling, you can click to select node too'
 	            ),
 	            React.createElement(
 	              'li',
@@ -1144,6 +1161,7 @@
 	          tree: this.state.tree,
 	          save: this.save.bind(this),
 	          cancelEdit: this.cancelEdit.bind(this),
+	          setFocus: this.setFocus.bind(this),
 	          currentlyFocused: this.state.currentlyFocused,
 	          currentlyEditing: this.state.currentlyEditing
 	        })

@@ -544,7 +544,7 @@ class AgileTreeContainer extends Component {
               <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left<br />
             </li>
             <li>
-              <code>w</code> next sibling, <code>b</code> previous sibling, you can click to select node too
+              <code>w</code> next sibling, <code>b</code> previous sibling, you can `click` to select node too
             </li>
             <li>
               <code>0 (zero)</code> to move to the very top, <code>g</code> to move to top of current, <code>G</code> bottom of current

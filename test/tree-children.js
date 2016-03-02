@@ -196,4 +196,5 @@ describe('tree children', function () {
     assert.equal(getSiblingBelow(tree, row3.id), null);
     assert.equal(getSiblingBelow(tree, row4.id), null);
   });
+
 });

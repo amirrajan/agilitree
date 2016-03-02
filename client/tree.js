@@ -191,7 +191,9 @@ export function update(table, id, text) {
 }
 
 export function del(table, id) {
-  return filter(table, t => t.id != id);
+  var workingSet = split(table, id);
+  each(workingSet.below, r => r.order -= 1);
+  return sort(concat(workingSet.above, workingSet.below, workingSet.rest));
 }
 
 export function pasteBelow(table, belowId, row) {
@@ -216,8 +218,8 @@ export function pasteAbove(table, aboveId, row) {
   if(!findRow(table, aboveId)) return table;
 
   var workingSet = split(table, aboveId);
-  each(workingSet.below, r => r.order -= 1);
-  workingSet.on.order -= 1;
+  each(workingSet.below, r => r.order += 1);
+  workingSet.on.order += 1;
 
   return sort(
     concat(

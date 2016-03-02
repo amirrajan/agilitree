@@ -21086,9 +21086,11 @@
 	}
 	
 	function del(table, id) {
-	  return (0, _lodash.filter)(table, function (t) {
-	    return t.id != id;
+	  var workingSet = split(table, id);
+	  (0, _lodash.each)(workingSet.below, function (r) {
+	    return r.order -= 1;
 	  });
+	  return sort((0, _lodash.concat)(workingSet.above, workingSet.below, workingSet.rest));
 	}
 	
 	function pasteBelow(table, belowId, row) {
@@ -21109,9 +21111,9 @@
 	
 	  var workingSet = split(table, aboveId);
 	  (0, _lodash.each)(workingSet.below, function (r) {
-	    return r.order -= 1;
+	    return r.order += 1;
 	  });
-	  workingSet.on.order -= 1;
+	  workingSet.on.order += 1;
 	
 	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order - 1, workingSet.on.parentId)));
 	}

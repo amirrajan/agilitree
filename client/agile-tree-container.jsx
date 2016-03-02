@@ -53,6 +53,10 @@ class TreeNode extends Component {
     this.setState({ text: e.target.value });
   }
 
+  setFocus() {
+    this.props.setFocus(this.props.id);
+  }
+
   renderEditForm() {
     return (
       <li>
@@ -71,6 +75,7 @@ class TreeNode extends Component {
           tree={this.props.tree}
           save={this.props.save}
           cancelEdit={this.props.cancelEdit}
+          setFocus={this.props.setFocus}
           currentlyFocused={this.props.currentlyFocused}
           currentlyEditing={this.props.currentlyEditing}
           parentId={this.props.parentId}
@@ -79,7 +84,7 @@ class TreeNode extends Component {
     );
   }
 
-  renderMark() {
+  renderText() {
     if(!this.props.isMarked) return <span>{this.props.text}</span>;
 
     return <span style={{ fontWeight: 'bold', fontSize: 'larger' }}>{this.props.text}</span>;
@@ -93,11 +98,12 @@ class TreeNode extends Component {
     if(this.props.highlighted) className = 'currentlyFocused';
 
     return (
-        <li className={className}>{this.renderMark()}
+        <li onClick={this.setFocus.bind(this)} className={className}>{this.renderText()}
         <Tree
           tree={this.props.tree}
           save={this.props.save}
           cancelEdit={this.props.cancelEdit}
+          setFocus={this.props.setFocus}
           currentlyFocused={this.props.currentlyFocused}
           currentlyEditing={this.props.currentlyEditing}
           parentId={this.props.parentId}
@@ -123,6 +129,7 @@ class Tree extends Component {
         {map(parents,
           (v) => <TreeNode
                    key={v.id}
+                   id={v.id}
                    text={v.text}
                    isMarked={v.isMarked || false}
                    tree={this.props.tree}
@@ -132,6 +139,7 @@ class Tree extends Component {
                    highlighted={v.id == this.props.currentlyFocused}
                    save={this.props.save}
                    cancelEdit={this.props.cancelEdit}
+                   setFocus={this.props.setFocus}
                    parentId={v.id}
                  />)}
       </ul>
@@ -353,6 +361,13 @@ class AgileTreeContainer extends Component {
     });
   }
 
+  setFocus(id) {
+    this.setState({
+      currentlyEditing: null,
+      currentlyFocused: id
+    });
+  }
+
   topOrBottom(e) {
     var tree = this.state.tree;
     var currentlyFocused = this.state.currentlyFocused;
@@ -526,7 +541,7 @@ class AgileTreeContainer extends Component {
               <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left<br />
             </li>
             <li>
-              <code>w</code> next sibling, <code>b</code> previous sibling
+              <code>w</code> next sibling, <code>b</code> previous sibling, you can click to select node too
             </li>
             <li>
               <code>0 (zero)</code> to move to the very top, <code>g</code> to move to top of current, <code>G</code> bottom of current
@@ -560,6 +575,7 @@ class AgileTreeContainer extends Component {
           tree={this.state.tree}
           save={this.save.bind(this)}
           cancelEdit={this.cancelEdit.bind(this)}
+          setFocus={this.setFocus.bind(this)}
           currentlyFocused={this.state.currentlyFocused}
           currentlyEditing={this.state.currentlyEditing}
         />

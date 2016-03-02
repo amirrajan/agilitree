@@ -21086,6 +21086,8 @@
 	}
 	
 	function del(table, id) {
+	  if (!findRow(table, id)) return table;
+	
 	  var workingSet = split(table, id);
 	  (0, _lodash.each)(workingSet.below, function (r) {
 	    return r.order -= 1;

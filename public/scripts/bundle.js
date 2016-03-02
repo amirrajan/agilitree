@@ -1030,7 +1030,13 @@
 	                null,
 	                'b'
 	              ),
-	              ' previous sibling, you can `click` to select node too'
+	              ' previous sibling, you can ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'click'
+	              ),
+	              ' to select node too'
 	            ),
 	            React.createElement(
 	              'li',

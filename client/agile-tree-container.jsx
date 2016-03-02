@@ -85,20 +85,23 @@ class TreeNode extends Component {
   }
 
   renderText() {
-    if(!this.props.isMarked) return <span>{this.props.text}</span>;
+    let text = this.props.text;
+    if(text == '') text = '(empty)';
 
-    return <span style={{ fontWeight: 'bold', fontSize: 'larger' }}>{this.props.text}</span>;
+    let className = 'unfocused';
+    if(this.props.highlighted) className = 'currentlyFocused';
+
+    var styles = { };
+    if(this.props.isMarked) styles = { fontWeight: 'bold', fontSize: 'larger' };
+
+    return <span style={styles} onClick={this.setFocus.bind(this)} className={className}>{text}</span>;
   }
 
   render() {
     if(this.props.editing) return this.renderEditForm();
 
-    let className = 'unfocused';
-
-    if(this.props.highlighted) className = 'currentlyFocused';
-
     return (
-        <li onClick={this.setFocus.bind(this)} className={className}>{this.renderText()}
+        <li>{this.renderText()}
         <Tree
           tree={this.props.tree}
           save={this.props.save}

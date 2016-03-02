@@ -6,6 +6,8 @@ body {
 
 .currentlyFocused {
   background-color: #EEFFEE;
+  display: inline-block;
+  width: 80%;
 }
 
 li {

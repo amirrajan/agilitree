@@ -191,6 +191,8 @@ export function update(table, id, text) {
 }
 
 export function del(table, id) {
+  if(!findRow(table, id)) return table;
+
   var workingSet = split(table, id);
   each(workingSet.below, r => r.order -= 1);
   return sort(concat(workingSet.above, workingSet.below, workingSet.rest));

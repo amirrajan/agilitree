@@ -482,16 +482,19 @@
 	  }, {
 	    key: 'renderText',
 	    value: function renderText() {
-	      if (!this.props.isMarked) return React.createElement(
-	        'span',
-	        null,
-	        this.props.text
-	      );
+	      var text = this.props.text;
+	      if (text == '') text = '(empty)';
+	
+	      var className = 'unfocused';
+	      if (this.props.highlighted) className = 'currentlyFocused';
+	
+	      var styles = {};
+	      if (this.props.isMarked) styles = { fontWeight: 'bold', fontSize: 'larger' };
 	
 	      return React.createElement(
 	        'span',
-	        { style: { fontWeight: 'bold', fontSize: 'larger' } },
-	        this.props.text
+	        { style: styles, onClick: this.setFocus.bind(this), className: className },
+	        text
 	      );
 	    }
 	  }, {
@@ -499,13 +502,9 @@
 	    value: function render() {
 	      if (this.props.editing) return this.renderEditForm();
 	
-	      var className = 'unfocused';
-	
-	      if (this.props.highlighted) className = 'currentlyFocused';
-	
 	      return React.createElement(
 	        'li',
-	        { onClick: this.setFocus.bind(this), className: className },
+	        null,
 	        this.renderText(),
 	        React.createElement(Tree, {
 	          tree: this.props.tree,

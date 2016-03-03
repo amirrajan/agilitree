@@ -38,19 +38,25 @@ class TreeNode extends Component {
   saveOrNothing(e) {
     if(e.keyCode == 27 && this.props.text != this.state.text) {
       this.props.save(this.state.text);
+      e.preventDefault();
     } else if(e.keyCode == 219 && e.ctrlKey && this.props.text != this.state.text) {
       this.props.save(this.state.text);
+      e.preventDefault();
     } else if(e.keyCode == 13 && this.props.text != this.state.text) {
       this.props.save(this.state.text);
+      e.preventDefault();
     } else if(e.keyCode == 27) {
       this.setState({ text: this.props.text });
       this.props.cancelEdit();
+      e.preventDefault();
     } else if(e.keyCode == 219 && e.ctrlKey) {
       this.setState({ text: this.props.text });
       this.props.cancelEdit();
+      e.preventDefault();
     } else if(e.keyCode == 13) {
       this.setState({ text: this.props.text });
       this.props.cancelEdit();
+      e.preventDefault();
     }
   }
 

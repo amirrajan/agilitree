@@ -20970,7 +20970,7 @@
 	}
 	
 	function sort(table) {
-	  return (0, _lodash.sortBy)(table, 'order');
+	  return (0, _lodash.orderBy)(table, ['parentId', 'order'], ['desc', 'asc']);
 	}
 	
 	function rowsAbove(table, order, parentId) {
@@ -21077,8 +21077,8 @@
 	
 	function split(table, onId) {
 	  var on = findRow(table, onId);
-	  var above = rowsAbove(table, on.order);
-	  var below = rowsBelow(table, on.order);
+	  var above = rowsAbove(table, on.order, on.parentId);
+	  var below = rowsBelow(table, on.order, on.parentId);
 	  var rest = (0, _lodash.difference)(table, (0, _lodash.concat)(above, on, below));
 	
 	  return { above: above, on: on, below: below, rest: rest };
@@ -21122,9 +21122,11 @@
 	  if (!findRow(table, id)) return table;
 	
 	  var workingSet = split(table, id);
+	
 	  (0, _lodash.each)(workingSet.below, function (r) {
 	    return r.order -= 1;
 	  });
+	
 	  return sort((0, _lodash.concat)(workingSet.above, workingSet.below, workingSet.rest));
 	}
 	

@@ -6,6 +6,7 @@ import {
   logAddBelow,
   logAddAbove,
   logAddRight,
+  logCut,
   replay,
   getAbove,
   getSiblingAbove,
@@ -33,7 +34,7 @@ function initialState() {
   return [ ];
 }
 
-describe('tree children', function () {
+describe('tree children', function() {
   specify('adding children', function() {
     var row1 = newRow('root');
     var row2 = newRow('foo');
@@ -66,6 +67,37 @@ describe('tree children', function () {
     };
 
     areSame(firstRight, expectedFirstRight);
+  });
+
+  specify('cut child only affects sibling nodes', function() {
+    var row1 = newRow('./root');
+    var row2 = newRow('./root/child');
+    var row3 = newRow('./root/child2');
+    var row4 = newRow('./foo');
+
+    var logs = logAdd(initialState(), row1);
+    logs = logAddRight(logs, row1.id, row2);
+    logs = logAddBelow(logs, row2.id, row3);
+    logs = logAddBelow(logs, row1.id, row4);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row4.id, text: row4.text, order: 2, parentId: null },
+      { id: row2.id, text: row2.text, order: 1, parentId: row1.id },
+      { id: row3.id, text: row3.text, order: 2, parentId: row1.id }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+
+    logs = logCut(logs, row2.id);
+
+    expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row4.id, text: row4.text, order: 2, parentId: null },
+      { id: row3.id, text: row3.text, order: 1, parentId: row1.id }
+    ]
+
+    areSame(replay(logs), expectedStructure);
   });
 
   describe('adding multiple children', function() {
@@ -196,5 +228,4 @@ describe('tree children', function () {
     assert.equal(getSiblingBelow(tree, row3.id), null);
     assert.equal(getSiblingBelow(tree, row4.id), null);
   });
-
 });

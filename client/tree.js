@@ -6,7 +6,8 @@ import {
   last,
   concat,
   difference,
-  reverse
+  reverse,
+  orderBy
 } from 'lodash';
 
 function newRow(id, text, order, parentId) {
@@ -31,7 +32,9 @@ export function findRow(table, id) {
   return first(filter(table, { id }));
 }
 
-function sort(table) { return sortBy(table, 'order'); }
+function sort(table) {
+  return orderBy(table, ['parentId', 'order'], ['desc', 'asc']);
+}
 
 function rowsAbove(table, order, parentId) {
   return filter(
@@ -136,8 +139,8 @@ export function bottom(table, reference) {
 
 export function split(table, onId) {
   var on = findRow(table, onId);
-  var above = rowsAbove(table, on.order);
-  var below = rowsBelow(table, on.order);
+  var above = rowsAbove(table, on.order, on.parentId);
+  var below = rowsBelow(table, on.order, on.parentId);
   var rest = difference(table, concat(above, on, below));
 
   return { above, on, below, rest };
@@ -194,7 +197,9 @@ export function del(table, id) {
   if(!findRow(table, id)) return table;
 
   var workingSet = split(table, id);
+
   each(workingSet.below, r => r.order -= 1);
+
   return sort(concat(workingSet.above, workingSet.below, workingSet.rest));
 }
 

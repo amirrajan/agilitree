@@ -40,10 +40,15 @@ class TreeNode extends Component {
       this.props.save(this.state.text);
     } else if(e.keyCode == 219 && e.ctrlKey && this.props.text != this.state.text) {
       this.props.save(this.state.text);
+    } else if(e.keyCode == 13 && this.props.text != this.state.text) {
+      this.props.save(this.state.text);
     } else if(e.keyCode == 27) {
       this.setState({ text: this.props.text });
       this.props.cancelEdit();
     } else if(e.keyCode == 219 && e.ctrlKey) {
+      this.setState({ text: this.props.text });
+      this.props.cancelEdit();
+    } else if(e.keyCode == 13) {
       this.setState({ text: this.props.text });
       this.props.cancelEdit();
     }

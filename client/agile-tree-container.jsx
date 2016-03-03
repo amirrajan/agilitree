@@ -561,7 +561,7 @@ class AgileTreeContainer extends Component {
               <code>0 (zero)</code> to move to the very top, <code>g</code> to move to top of current, <code>G</code> bottom of current
             </li>
             <li>
-              <code>c or i</code> to change item, <code>esc or ctrl+[</code> to save
+              <code>c or i</code> to change item, <code>esc or ctrl+[ or enter</code> to save
             </li>
             <li>
               <code>m</code> to mark/highlight item (toggle)

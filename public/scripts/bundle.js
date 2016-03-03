@@ -1083,7 +1083,7 @@
 	              React.createElement(
 	                'code',
 	                null,
-	                'esc or ctrl+['
+	                'esc or ctrl+[ or enter'
 	              ),
 	              ' to save'
 	            ),

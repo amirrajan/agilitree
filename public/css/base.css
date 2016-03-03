@@ -3,7 +3,6 @@ body {
   font-size: 12px;
 }
 
-
 .currentlyFocused {
   background-color: #EEFFEE;
   display: inline-block;
@@ -24,6 +23,7 @@ textarea {
   font-family: monospace;
   font-size: 12px;
   padding: 0 0;
+  width: 80%
 }
 
 code {
@@ -41,6 +41,10 @@ hr {
   background-image: -o-linear-gradient(left, #ccc, #333, #ccc);
 }
 
-textarea {
+input {
+  border: none;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 0 0;
   width: 80%
 }

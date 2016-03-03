@@ -469,12 +469,11 @@
 	      return React.createElement(
 	        'li',
 	        null,
-	        React.createElement('textarea', {
+	        React.createElement('input', {
 	          autoFocus: true,
 	          'data-uia-todo': true,
 	          type: 'text',
 	          placeholder: 'todo',
-	          rows: '1',
 	          onKeyUp: this.saveOrNothing.bind(this),
 	          onChange: this.update.bind(this),
 	          value: this.state.text

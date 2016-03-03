@@ -71,12 +71,11 @@ class TreeNode extends Component {
   renderEditForm() {
     return (
       <li>
-        <textarea
+        <input
           autoFocus
           data-uia-todo
           type='text'
           placeholder='todo'
-          rows='1'
           onKeyUp={this.saveOrNothing.bind(this)}
           onChange={this.update.bind(this)}
           value={this.state.text}

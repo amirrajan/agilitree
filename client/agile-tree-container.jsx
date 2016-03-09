@@ -517,6 +517,12 @@ class AgileTreeContainer extends Component {
     e.preventDefault()
   }
 
+  scrollTo(e) {
+    $('html, body').animate({
+      scrollTop: $(".currentlyFocused").offset().top - 100
+    }, 250);
+  }
+
   componentDidMount() {
     key('c', this.edit.bind(this));
     key('i', this.edit.bind(this));
@@ -538,6 +544,7 @@ class AgileTreeContainer extends Component {
     key('ctrl+r', this.redo.bind(this));
     key('w', this.addSiblingOrMoveBelowSibling.bind(this));
     key('b', this.addSiblingOrMoveAboveSibling.bind(this));
+    key('z', this.scrollTo.bind(this));
   }
 
   render() {

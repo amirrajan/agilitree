@@ -572,7 +572,6 @@ class AgileTreeContainer extends Component {
     key('ctrl+r', this.redo.bind(this));
     key('w', this.addSiblingOrMoveBelowSibling.bind(this));
     key('b', this.addSiblingOrMoveAboveSibling.bind(this));
-    key('z', this.scrollDebounce.bind(this));
   }
 
   render() {
@@ -586,7 +585,7 @@ class AgileTreeContainer extends Component {
               chrome plugins: disable vimium for this page
             </li>
             <li>
-              <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left, <code>z</code> to center
+              <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left
             </li>
             <li>
               <code>w</code> next sibling, <code>b</code> previous sibling, you can <code>click</code> to select node too

@@ -21166,7 +21166,11 @@
 	    return r.order += 1;
 	  });
 	
-	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order + 1, workingSet.on.parentId)));
+	  var nr = newRow(row.id, row.text, workingSet.on.order + 1, workingSet.on.parentId);
+	
+	  if (row.isMarked) nr.isMarked = row.isMarked;
+	
+	  return sort((0, _lodash.concat)(nr, combine(workingSet)));
 	}
 	
 	function pasteAbove(table, aboveId, row) {
@@ -21179,7 +21183,11 @@
 	  });
 	  workingSet.on.order += 1;
 	
-	  return sort((0, _lodash.concat)(combine(workingSet), newRow(row.id, row.text, workingSet.on.order - 1, workingSet.on.parentId)));
+	  var nr = newRow(row.id, row.text, workingSet.on.order - 1, workingSet.on.parentId);
+	
+	  if (row.isMarked) nr.isMarked = row.isMarked;
+	
+	  return sort((0, _lodash.concat)(nr, combine(workingSet)));
 	}
 	
 	function addRight(table, rightOfId, row) {

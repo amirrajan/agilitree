@@ -302,6 +302,8 @@ class AgileTreeContainer extends Component {
     }
 
     e.preventDefault();
+
+    this.scrollTo(e);
   }
 
   left(e) {

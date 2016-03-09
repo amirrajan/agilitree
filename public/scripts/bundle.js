@@ -734,6 +734,8 @@
 	      }
 	
 	      e.preventDefault();
+	
+	      this.scrollTo(e);
 	    }
 	  }, {
 	    key: 'left',

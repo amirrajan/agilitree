@@ -952,6 +952,13 @@
 	      e.preventDefault();
 	    }
 	  }, {
+	    key: 'scrollTo',
+	    value: function scrollTo(e) {
+	      $('html, body').animate({
+	        scrollTop: $(".currentlyFocused").offset().top - 100
+	      }, 250);
+	    }
+	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      key('c', this.edit.bind(this));
@@ -974,6 +981,7 @@
 	      key('ctrl+r', this.redo.bind(this));
 	      key('w', this.addSiblingOrMoveBelowSibling.bind(this));
 	      key('b', this.addSiblingOrMoveAboveSibling.bind(this));
+	      key('z', this.scrollTo.bind(this));
 	    }
 	  }, {
 	    key: 'render',

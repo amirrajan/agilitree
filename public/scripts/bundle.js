@@ -1003,7 +1003,6 @@
 	      key('ctrl+r', this.redo.bind(this));
 	      key('w', this.addSiblingOrMoveBelowSibling.bind(this));
 	      key('b', this.addSiblingOrMoveAboveSibling.bind(this));
-	      key('z', this.scrollDebounce.bind(this));
 	    }
 	  }, {
 	    key: 'render',
@@ -1053,13 +1052,7 @@
 	                null,
 	                'h'
 	              ),
-	              ' left, ',
-	              React.createElement(
-	                'code',
-	                null,
-	                'z'
-	              ),
-	              ' to center'
+	              ' left'
 	            ),
 	            React.createElement(
 	              'li',

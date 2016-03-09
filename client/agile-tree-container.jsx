@@ -521,6 +521,8 @@ class AgileTreeContainer extends Component {
     $('html, body').animate({
       scrollTop: $(".currentlyFocused").offset().top - 100
     }, 250);
+
+    e.preventDefault();
   }
 
   componentDidMount() {

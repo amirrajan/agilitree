@@ -957,6 +957,8 @@
 	      $('html, body').animate({
 	        scrollTop: $(".currentlyFocused").offset().top - 100
 	      }, 250);
+	
+	      e.preventDefault();
 	    }
 	  }, {
 	    key: 'componentDidMount',

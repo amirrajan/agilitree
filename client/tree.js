@@ -210,14 +210,18 @@ export function pasteBelow(table, belowId, row) {
   var workingSet = split(table, belowId);
   each(workingSet.below, r => r.order += 1);
 
+  var nr = newRow(
+    row.id,
+    row.text,
+    workingSet.on.order + 1,
+    workingSet.on.parentId);
+
+  if(row.isMarked) nr.isMarked = row.isMarked;
+
   return sort(
     concat(
-      combine(workingSet),
-      newRow(
-        row.id,
-        row.text,
-        workingSet.on.order + 1,
-        workingSet.on.parentId)));
+      nr,
+      combine(workingSet)));
 }
 
 export function pasteAbove(table, aboveId, row) {
@@ -228,14 +232,18 @@ export function pasteAbove(table, aboveId, row) {
   each(workingSet.below, r => r.order += 1);
   workingSet.on.order += 1;
 
+  var nr = newRow(
+    row.id,
+    row.text,
+    workingSet.on.order - 1,
+    workingSet.on.parentId);
+
+  if(row.isMarked) nr.isMarked = row.isMarked;
+
   return sort(
     concat(
-      combine(workingSet),
-      newRow(
-        row.id,
-        row.text,
-        workingSet.on.order - 1,
-        workingSet.on.parentId)));
+      nr,
+      combine(workingSet)));
 }
 
 export function addRight(table, rightOfId, row) {
@@ -281,7 +289,7 @@ export function replay(logs, startingTable = [ ]) {
     } else if (l.action == 'pasteBelow') {
       startingTable = pasteBelow(startingTable, l.belowId, clipBoard);
       clipBoard = null;
-    } else if (l.action == 'pasteAbove'){
+    } else if (l.action == 'pasteAbove') {
       startingTable = pasteAbove(startingTable, l.aboveId, clipBoard);
       clipBoard = null;
     } else if (l.action == 'delete') {

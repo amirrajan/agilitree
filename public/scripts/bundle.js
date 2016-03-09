@@ -594,6 +594,8 @@
 	
 	    var tree = (0, _tree.replay)(logs);
 	
+	    _this4.scrollDebounce = (0, _lodash.debounce)(_this4.scrollTo, 300);
+	
 	    _this4.state = {
 	      logs: logs,
 	      tree: tree,
@@ -684,6 +686,8 @@
 	        currentlyEditing: null
 	      });
 	
+	      this.scrollDebounce();
+	
 	      e.preventDefault();
 	    }
 	  }, {
@@ -733,6 +737,8 @@
 	        });
 	      }
 	
+	      this.scrollDebounce();
+	
 	      e.preventDefault();
 	    }
 	  }, {
@@ -746,6 +752,8 @@
 	          currentlyEditing: null
 	        });
 	      }
+	
+	      this.scrollDebounce();
 	
 	      e.preventDefault();
 	    }
@@ -825,6 +833,8 @@
 	          currentlyFocused: (0, _tree.top)(tree, currentlyFocused).id
 	        });
 	      }
+	
+	      this.scrollDebounce();
 	
 	      e.preventDefault();
 	    }
@@ -966,11 +976,9 @@
 	        offset = elOffset;
 	      }
 	
-	      $('html, body').animate({
-	        scrollTop: offset
-	      }, 250);
+	      $('html, body').animate({ scrollTop: offset }, 250);
 	
-	      e.preventDefault();
+	      if (e) e.preventDefault();
 	    }
 	  }, {
 	    key: 'componentDidMount',
@@ -995,7 +1003,7 @@
 	      key('ctrl+r', this.redo.bind(this));
 	      key('w', this.addSiblingOrMoveBelowSibling.bind(this));
 	      key('b', this.addSiblingOrMoveAboveSibling.bind(this));
-	      key('z', this.scrollTo.bind(this));
+	      key('z', this.scrollDebounce.bind(this));
 	    }
 	  }, {
 	    key: 'render',

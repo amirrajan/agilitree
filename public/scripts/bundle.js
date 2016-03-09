@@ -734,8 +734,6 @@
 	      }
 	
 	      e.preventDefault();
-	
-	      this.scrollTo(e);
 	    }
 	  }, {
 	    key: 'left',
@@ -956,8 +954,20 @@
 	  }, {
 	    key: 'scrollTo',
 	    value: function scrollTo(e) {
+	      var el = $(".currentlyFocused");
+	      var elOffset = el.offset().top;
+	      var elHeight = el.height();
+	      var windowHeight = $(window).height();
+	      var offset = null;
+	
+	      if (elHeight < windowHeight) {
+	        offset = elOffset - (windowHeight / 2 - elHeight / 2);
+	      } else {
+	        offset = elOffset;
+	      }
+	
 	      $('html, body').animate({
-	        scrollTop: $(".currentlyFocused").offset().top - 100
+	        scrollTop: offset
 	      }, 250);
 	
 	      e.preventDefault();
@@ -1035,8 +1045,13 @@
 	                null,
 	                'h'
 	              ),
-	              ' left',
-	              React.createElement('br', null)
+	              ' left, ',
+	              React.createElement(
+	                'code',
+	                null,
+	                'z'
+	              ),
+	              ' to center'
 	            ),
 	            React.createElement(
 	              'li',

@@ -24,7 +24,13 @@ import {
   logToggleMark
 } from './tree.js';
 
-import { map, filter, difference, last } from 'lodash';
+import {
+  map,
+  filter,
+  difference,
+  last,
+  debounce
+} from 'lodash';
 
 class TreeNode extends Component {
   getinitialState() {
@@ -302,8 +308,6 @@ class AgileTreeContainer extends Component {
     }
 
     e.preventDefault();
-
-    this.scrollTo(e);
   }
 
   left(e) {
@@ -517,11 +521,24 @@ class AgileTreeContainer extends Component {
     });
 
     e.preventDefault()
+
   }
 
   scrollTo(e) {
+    var el = $(".currentlyFocused");
+    var elOffset = el.offset().top;
+    var elHeight = el.height();
+    var windowHeight = $(window).height();
+    var offset = null;
+
+    if (elHeight < windowHeight) {
+      offset = elOffset - ((windowHeight / 2) - (elHeight / 2));
+    } else {
+      offset = elOffset;
+    }
+
     $('html, body').animate({
-      scrollTop: $(".currentlyFocused").offset().top - 100
+      scrollTop: offset
     }, 250);
 
     e.preventDefault();
@@ -562,7 +579,7 @@ class AgileTreeContainer extends Component {
               chrome plugins: disable vimium for this page
             </li>
             <li>
-              <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left<br />
+              <code>k</code> to move up, <code>j</code> down, <code>l</code> to move right, <code>h</code> left, <code>z</code> to center
             </li>
             <li>
               <code>w</code> next sibling, <code>b</code> previous sibling, you can <code>click</code> to select node too

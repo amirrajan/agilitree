@@ -174,6 +174,8 @@ class AgileTreeContainer extends Component {
 
     var tree = replay(logs);
 
+    this.scrollDebounce = debounce(this.scrollTo, 300);
+
     this.state = {
       logs,
       tree,
@@ -251,6 +253,8 @@ class AgileTreeContainer extends Component {
       currentlyEditing: null
     });
 
+    this.scrollDebounce();
+
     e.preventDefault();
   }
 
@@ -307,6 +311,8 @@ class AgileTreeContainer extends Component {
       });
     }
 
+    this.scrollDebounce();
+
     e.preventDefault();
   }
 
@@ -319,6 +325,8 @@ class AgileTreeContainer extends Component {
         currentlyEditing: null
       });
     }
+
+    this.scrollDebounce();
 
     e.preventDefault();
   }
@@ -400,6 +408,8 @@ class AgileTreeContainer extends Component {
         currentlyFocused: top(tree, currentlyFocused).id
       });
     }
+
+    this.scrollDebounce();
 
     e.preventDefault();
   }
@@ -521,7 +531,6 @@ class AgileTreeContainer extends Component {
     });
 
     e.preventDefault()
-
   }
 
   scrollTo(e) {
@@ -537,11 +546,9 @@ class AgileTreeContainer extends Component {
       offset = elOffset;
     }
 
-    $('html, body').animate({
-      scrollTop: offset
-    }, 250);
+    $('html, body').animate({ scrollTop: offset }, 250);
 
-    e.preventDefault();
+    if(e) e.preventDefault();
   }
 
   componentDidMount() {
@@ -565,7 +572,7 @@ class AgileTreeContainer extends Component {
     key('ctrl+r', this.redo.bind(this));
     key('w', this.addSiblingOrMoveBelowSibling.bind(this));
     key('b', this.addSiblingOrMoveAboveSibling.bind(this));
-    key('z', this.scrollTo.bind(this));
+    key('z', this.scrollDebounce.bind(this));
   }
 
   render() {

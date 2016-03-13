@@ -15,7 +15,8 @@ import {
   getBelow,
   logPasteBelow,
   logPasteAbove,
-  logToggleMark
+  logToggleMark,
+  logToggleStrikeThrough
 } from '../client/tree.js';
 import assert from 'assert';
 import { fromJS } from 'immutable';
@@ -393,6 +394,24 @@ describe('tree', function () {
     var expectedStructure = [
       { id: row2.id, text: row2.text, order: 1, isMarked: true, parentId: null },
       { id: row1.id, text: row1.text, order: 2, parentId: null }
+    ];
+
+    areSame(replay(logs), expectedStructure);
+  });
+
+  specify('cut retains strike through node', function() {
+    var row1 = newRow('1');
+    var row2 = newRow('1');
+
+    var logs = logAdd(initialState(), row1);
+    logs = logAddBelow(logs, row1.id, row2);
+    logs = logToggleStrikeThrough(logs, row2.id);
+    logs = logCut(logs, row2.id);
+    logs = logPasteBelow(logs, row1.id);
+
+    var expectedStructure = [
+      { id: row1.id, text: row1.text, order: 1, parentId: null },
+      { id: row2.id, text: row2.text, order: 2, isStrikedThrough: true, parentId: null },
     ];
 
     areSame(replay(logs), expectedStructure);

@@ -179,10 +179,11 @@ export function addAbove(table, aboveId, row) {
   return sort(
     concat(
       combine(workingSet),
-      newRow(row.id,
-             row.text,
-             workingSet.on.order - 1,
-             workingSet.on.parentId)));
+      newRow(
+        row.id,
+        row.text,
+        workingSet.on.order - 1,
+        workingSet.on.parentId)));
 }
 
 export function update(table, id, text) {
@@ -203,6 +204,13 @@ export function del(table, id) {
   return sort(concat(workingSet.above, workingSet.below, workingSet.rest));
 }
 
+function assignPersistedAttributes(target, reference) {
+  if(reference.isMarked) target.isMarked = reference.isMarked;
+  if(reference.isStrikedThrough) target.isStrikedThrough = reference.isStrikedThrough;
+
+  return target;
+}
+
 export function pasteBelow(table, belowId, row) {
   if(!row) return table;
   if(!findRow(table, belowId)) return table;
@@ -216,7 +224,7 @@ export function pasteBelow(table, belowId, row) {
     workingSet.on.order + 1,
     workingSet.on.parentId);
 
-  if(row.isMarked) nr.isMarked = row.isMarked;
+  nr = assignPersistedAttributes(nr, row);
 
   return sort(
     concat(
@@ -238,7 +246,7 @@ export function pasteAbove(table, aboveId, row) {
     workingSet.on.order - 1,
     workingSet.on.parentId);
 
-  if(row.isMarked) nr.isMarked = row.isMarked;
+  nr = assignPersistedAttributes(nr, row);
 
   return sort(
     concat(
@@ -270,6 +278,16 @@ export function toggleMark(table, id) {
   return table;
 }
 
+export function toggleStrikeThrough(table, id) {
+  var row = findRow(table, id);
+
+  if(!row) return table;
+
+  row.isStrikedThrough = !row.isStrikedThrough;
+
+  return table;
+}
+
 export function replay(logs, startingTable = [ ]) {
   var clipBoard = null;
   each(logs, l => {
@@ -297,6 +315,8 @@ export function replay(logs, startingTable = [ ]) {
       startingTable = del(startingTable, l.id);
     } else if (l.action == 'toggleMark') {
       startingTable = toggleMark(startingTable, l.id);
+    } else if (l.action == 'toggleStrikeThrough') {
+      startingTable = toggleStrikeThrough(startingTable, l.id);
     }
   });
 
@@ -341,4 +361,8 @@ export function logDelete(logs, id) {
 
 export function logToggleMark(logs, id) {
   return concat(logs, { action: 'toggleMark', id });
+}
+
+export function logToggleStrikeThrough(logs, id) {
+  return concat(logs, { action: 'toggleStrikeThrough', id });
 }

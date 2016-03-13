@@ -21,7 +21,8 @@ import {
   top,
   bottom,
   logPasteAbove,
-  logToggleMark
+  logToggleMark,
+  logToggleStrikeThrough
 } from './tree.js';
 
 import {
@@ -102,6 +103,7 @@ class TreeNode extends Component {
 
     var styles = { };
     if(this.props.isMarked) styles = { fontWeight: 'bold', fontSize: 'larger' };
+    if(this.props.isStrikedThrough) styles = { textDecoration: 'line-through', color: '#999999' };
 
     return <span style={styles} onClick={this.setFocus.bind(this)} className={className}>{text}</span>;
   }
@@ -144,6 +146,7 @@ class Tree extends Component {
                    id={v.id}
                    text={v.text}
                    isMarked={v.isMarked || false}
+                   isStrikedThrough={v.isStrikedThrough || false}
                    tree={this.props.tree}
                    currentlyEditing={this.props.currentlyEditing}
                    currentlyFocused={this.props.currentlyFocused}
@@ -451,6 +454,8 @@ class AgileTreeContainer extends Component {
       newFocus = editToRemove.id;
     } else if(editToRemove.action == 'toggleMark') {
       newFocus = this.state.currentlyFocused;
+    } else if(editToRemove.action == 'toggleStrikeThrough') {
+      newFocus = this.state.currentlyFocused;
     } else {
       newFocus = null;
     }
@@ -499,6 +504,8 @@ class AgileTreeContainer extends Component {
       newFocus = this.findClosest(this.state.tree, toRedo.id).id;
     } else if(toRedo.action == 'toggleMark') {
       newFocus = toRedo.id;
+    } else if(toRedo.action == 'toggleStrikeThrough') {
+      newFocus = toRedo.id;
     } else {
       newFocus = null;
     }
@@ -517,6 +524,17 @@ class AgileTreeContainer extends Component {
 
   toggleMark(e) {
     var logs = logToggleMark(this.state.logs, this.state.currentlyFocused);
+
+    this.setState({
+      logs,
+      tree: replay(logs),
+    });
+
+    e.preventDefault()
+  }
+
+  toggleStrikeThrough(e) {
+    var logs = logToggleStrikeThrough(this.state.logs, this.state.currentlyFocused);
 
     this.setState({
       logs,
@@ -562,6 +580,7 @@ class AgileTreeContainer extends Component {
     key('shift+p', this.pasteAboveOrBelow.bind(this));
     key('u', this.undo.bind(this));
     key('m', this.toggleMark.bind(this));
+    key('s', this.toggleStrikeThrough.bind(this));
     key('ctrl+r', this.redo.bind(this));
     key('w', this.addSiblingOrMoveBelowSibling.bind(this));
     key('b', this.addSiblingOrMoveAboveSibling.bind(this));
@@ -590,7 +609,7 @@ class AgileTreeContainer extends Component {
               <code>c or i</code> to change item, <code>esc or ctrl+[ or enter</code> to save
             </li>
             <li>
-              <code>m</code> to mark/highlight item (toggle)
+              <code>m</code> to mark/highlight item (toggle), <code>s</code> to strike through item
             </li>
             <li>
               <code>o</code> to insert below, <code>O</code> for above

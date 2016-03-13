@@ -428,26 +428,20 @@
 	      this.setState({ text: this.props.text });
 	    }
 	  }, {
+	    key: 'saveAttempted',
+	    value: function saveAttempted(e) {
+	      if (e.keyCode == 27) return true;
+	      if (e.keyCode == 219 && e.ctrlKey) return true;
+	      if (e.keyCode == 13) return true;
+	      return false;
+	    }
+	  }, {
 	    key: 'saveOrNothing',
 	    value: function saveOrNothing(e) {
-	      if (e.keyCode == 27 && this.props.text != this.state.text) {
+	      if (this.saveAttempted(e) && this.props.text != this.state.text) {
 	        this.props.save(this.state.text);
 	        e.preventDefault();
-	      } else if (e.keyCode == 219 && e.ctrlKey && this.props.text != this.state.text) {
-	        this.props.save(this.state.text);
-	        e.preventDefault();
-	      } else if (e.keyCode == 13 && this.props.text != this.state.text) {
-	        this.props.save(this.state.text);
-	        e.preventDefault();
-	      } else if (e.keyCode == 27) {
-	        this.setState({ text: this.props.text });
-	        this.props.cancelEdit();
-	        e.preventDefault();
-	      } else if (e.keyCode == 219 && e.ctrlKey) {
-	        this.setState({ text: this.props.text });
-	        this.props.cancelEdit();
-	        e.preventDefault();
-	      } else if (e.keyCode == 13) {
+	      } else if (this.saveAttempted(e)) {
 	        this.setState({ text: this.props.text });
 	        this.props.cancelEdit();
 	        e.preventDefault();
@@ -500,6 +494,7 @@
 	
 	      var styles = {};
 	      if (this.props.isMarked) styles = { fontWeight: 'bold', fontSize: 'larger' };
+	      if (this.props.isStrikedThrough) styles = { textDecoration: 'line-through', color: '#999999' };
 	
 	      return React.createElement(
 	        'span',
@@ -564,6 +559,7 @@
 	            id: v.id,
 	            text: v.text,
 	            isMarked: v.isMarked || false,
+	            isStrikedThrough: v.isStrikedThrough || false,
 	            tree: _this3.props.tree,
 	            currentlyEditing: _this3.props.currentlyEditing,
 	            currentlyFocused: _this3.props.currentlyFocused,
@@ -885,6 +881,8 @@
 	        newFocus = editToRemove.id;
 	      } else if (editToRemove.action == 'toggleMark') {
 	        newFocus = this.state.currentlyFocused;
+	      } else if (editToRemove.action == 'toggleStrikeThrough') {
+	        newFocus = this.state.currentlyFocused;
 	      } else {
 	        newFocus = null;
 	      }
@@ -934,6 +932,8 @@
 	        newFocus = this.findClosest(this.state.tree, toRedo.id).id;
 	      } else if (toRedo.action == 'toggleMark') {
 	        newFocus = toRedo.id;
+	      } else if (toRedo.action == 'toggleStrikeThrough') {
+	        newFocus = toRedo.id;
 	      } else {
 	        newFocus = null;
 	      }
@@ -953,6 +953,18 @@
 	    key: 'toggleMark',
 	    value: function toggleMark(e) {
 	      var logs = (0, _tree.logToggleMark)(this.state.logs, this.state.currentlyFocused);
+	
+	      this.setState({
+	        logs: logs,
+	        tree: (0, _tree.replay)(logs)
+	      });
+	
+	      e.preventDefault();
+	    }
+	  }, {
+	    key: 'toggleStrikeThrough',
+	    value: function toggleStrikeThrough(e) {
+	      var logs = (0, _tree.logToggleStrikeThrough)(this.state.logs, this.state.currentlyFocused);
 	
 	      this.setState({
 	        logs: logs,
@@ -1000,6 +1012,7 @@
 	      key('shift+p', this.pasteAboveOrBelow.bind(this));
 	      key('u', this.undo.bind(this));
 	      key('m', this.toggleMark.bind(this));
+	      key('s', this.toggleStrikeThrough.bind(this));
 	      key('ctrl+r', this.redo.bind(this));
 	      key('w', this.addSiblingOrMoveBelowSibling.bind(this));
 	      key('b', this.addSiblingOrMoveAboveSibling.bind(this));
@@ -1122,7 +1135,13 @@
 	                null,
 	                'm'
 	              ),
-	              ' to mark/highlight item (toggle)'
+	              ' to mark/highlight item (toggle), ',
+	              React.createElement(
+	                'code',
+	                null,
+	                's'
+	              ),
+	              ' to strike through item'
 	            ),
 	            React.createElement(
 	              'li',
@@ -20967,6 +20986,7 @@
 	exports.getRightOf = getRightOf;
 	exports.getFirstRightOf = getFirstRightOf;
 	exports.toggleMark = toggleMark;
+	exports.toggleStrikeThrough = toggleStrikeThrough;
 	exports.replay = replay;
 	exports.logAdd = logAdd;
 	exports.logAddBelow = logAddBelow;
@@ -20978,6 +20998,7 @@
 	exports.logPasteAbove = logPasteAbove;
 	exports.logDelete = logDelete;
 	exports.logToggleMark = logToggleMark;
+	exports.logToggleStrikeThrough = logToggleStrikeThrough;
 	
 	var _lodash = __webpack_require__(162);
 	
@@ -21158,6 +21179,13 @@
 	  return sort((0, _lodash.concat)(workingSet.above, workingSet.below, workingSet.rest));
 	}
 	
+	function assignPersistedAttributes(target, reference) {
+	  if (reference.isMarked) target.isMarked = reference.isMarked;
+	  if (reference.isStrikedThrough) target.isStrikedThrough = reference.isStrikedThrough;
+	
+	  return target;
+	}
+	
 	function pasteBelow(table, belowId, row) {
 	  if (!row) return table;
 	  if (!findRow(table, belowId)) return table;
@@ -21169,7 +21197,7 @@
 	
 	  var nr = newRow(row.id, row.text, workingSet.on.order + 1, workingSet.on.parentId);
 	
-	  if (row.isMarked) nr.isMarked = row.isMarked;
+	  nr = assignPersistedAttributes(nr, row);
 	
 	  return sort((0, _lodash.concat)(nr, combine(workingSet)));
 	}
@@ -21186,7 +21214,7 @@
 	
 	  var nr = newRow(row.id, row.text, workingSet.on.order - 1, workingSet.on.parentId);
 	
-	  if (row.isMarked) nr.isMarked = row.isMarked;
+	  nr = assignPersistedAttributes(nr, row);
 	
 	  return sort((0, _lodash.concat)(nr, combine(workingSet)));
 	}
@@ -21211,6 +21239,16 @@
 	  if (!row) return table;
 	
 	  row.isMarked = !row.isMarked;
+	
+	  return table;
+	}
+	
+	function toggleStrikeThrough(table, id) {
+	  var row = findRow(table, id);
+	
+	  if (!row) return table;
+	
+	  row.isStrikedThrough = !row.isStrikedThrough;
 	
 	  return table;
 	}
@@ -21244,6 +21282,8 @@
 	      startingTable = del(startingTable, l.id);
 	    } else if (l.action == 'toggleMark') {
 	      startingTable = toggleMark(startingTable, l.id);
+	    } else if (l.action == 'toggleStrikeThrough') {
+	      startingTable = toggleStrikeThrough(startingTable, l.id);
 	    }
 	  });
 	
@@ -21288,6 +21328,10 @@
 	
 	function logToggleMark(logs, id) {
 	  return (0, _lodash.concat)(logs, { action: 'toggleMark', id: id });
+	}
+	
+	function logToggleStrikeThrough(logs, id) {
+	  return (0, _lodash.concat)(logs, { action: 'toggleStrikeThrough', id: id });
 	}
 
 /***/ },

@@ -41,25 +41,18 @@ class TreeNode extends Component {
     this.setState({ text: this.props.text });
   }
 
+  saveAttempted(e) {
+    if(e.keyCode == 27) return true;
+    if(e.keyCode == 219 && e.ctrlKey) return true;
+    if(e.keyCode == 13) return true;
+    return false;
+  }
+
   saveOrNothing(e) {
-    if(e.keyCode == 27 && this.props.text != this.state.text) {
+    if(this.saveAttempted(e) && this.props.text != this.state.text) {
       this.props.save(this.state.text);
       e.preventDefault();
-    } else if(e.keyCode == 219 && e.ctrlKey && this.props.text != this.state.text) {
-      this.props.save(this.state.text);
-      e.preventDefault();
-    } else if(e.keyCode == 13 && this.props.text != this.state.text) {
-      this.props.save(this.state.text);
-      e.preventDefault();
-    } else if(e.keyCode == 27) {
-      this.setState({ text: this.props.text });
-      this.props.cancelEdit();
-      e.preventDefault();
-    } else if(e.keyCode == 219 && e.ctrlKey) {
-      this.setState({ text: this.props.text });
-      this.props.cancelEdit();
-      e.preventDefault();
-    } else if(e.keyCode == 13) {
+    } else if(this.saveAttempted(e)) {
       this.setState({ text: this.props.text });
       this.props.cancelEdit();
       e.preventDefault();

@@ -1,7 +1,5 @@
 Project planning for vim users.
 
-Demo: https://agilitree.herokuapp.com/
-
 Usage:
 
 - chrome plugins: disable vimium for this page
